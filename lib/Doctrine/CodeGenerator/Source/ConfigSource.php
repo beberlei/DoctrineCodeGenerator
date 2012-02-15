@@ -35,7 +35,9 @@ class ConfigSource
             $subNodes = array('stmts' => array());
             foreach ($struct['properties'] as $propertyName => $propertyStruct) {
                 $pp = new \PHPParser_Node_Stmt_PropertyProperty($propertyName);
-                $property = new \PHPParser_Node_Stmt_Property(1, array($pp));
+                $property = new \PHPParser_Node_Stmt_Property(
+                    PHPParser_Node_Stmt_Class::MODIFIER_PUBLIC, array($pp)
+                );
                 $subNodes['stmts'][] = $property;
             }
             $class = new \PHPParser_Node_Stmt_Class($className, $subNodes);

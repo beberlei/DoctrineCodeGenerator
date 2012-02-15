@@ -20,13 +20,17 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
+use Doctrine\Common\EventSubscriber;
 
-class GetterSetterListener implements \Doctrine\Common\EventSubscriber
+/**
+ * Each property is turned to protected and getters/setters are added.
+ */
+class GetterSetterListener implements EventSubscriber
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $node->type = 2; // set protected
+        $node->type = PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
 
         $class = $event->getParent($node);
 
