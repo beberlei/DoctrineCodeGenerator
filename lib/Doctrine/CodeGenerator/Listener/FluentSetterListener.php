@@ -25,36 +25,19 @@ use Doctrine\Common\EventSubscriber;
 /**
  * Each property is turned to protected and getters/setters are added.
  */
-class GetterSetterListener implements EventSubscriber
+class FluentSetterListener implements EventSubscriber
 {
-    public function onGenerateProperty(GeneratorEvent $event)
+    public function onGenerateSetter(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
-
-        $class = $event->getParent($node);
-
-        foreach ($node->props as $property) {
-            $setParam = new \PHPParser_Node_Param($property->name);
-            $setStmt = new \PHPParser_Node_Expr_Assign(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                ),
-                new \PHPParser_Node_Expr_Variable($property->name)
-            );
-            $returnStmt = new \PHPParser_Node_Stmt_Return(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                )
-            );
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('set'.ucfirst($property->name), array('stmts' => array($setStmt), 'params' => array($setParam)));
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('get'.ucfirst($property->name), array('stmts' => array($returnStmt)));
-        }
+        $node->stmts[] = new \PHPParser_Node_Stmt_Return(
+            new \PHPParser_Node_Expr_Variable('this')
+        );
     }
 
     public function getSubscribedEvents()
     {
-        return array('onGenerateProperty');
+        return array('onGenerateSetter');
     }
 }
 

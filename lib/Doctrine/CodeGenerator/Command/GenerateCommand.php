@@ -76,6 +76,7 @@ EOF
         $project = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
         $source->generate($project);
         $project->traverse();
+        $project->traverse();
         $project->write();
     }
 }

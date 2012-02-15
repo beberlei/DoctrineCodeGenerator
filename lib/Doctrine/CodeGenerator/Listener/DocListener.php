@@ -25,36 +25,50 @@ use Doctrine\Common\EventSubscriber;
 /**
  * Each property is turned to protected and getters/setters are added.
  */
-class GetterSetterListener implements EventSubscriber
+class DocListener implements EventSubscriber
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
+        $node->setDocComment(<<<EPM
+/**
+ * @var mixed
+ */
+EPM
+);
+    }
 
-        $class = $event->getParent($node);
+    public function onGenerateGetter(GeneratorEvent $event)
+    {
+        $node = $event->getNode();
+        $propertyName = lcfirst(substr($node->name, 3));
+        $node->setDocComment(<<<EPM
+/**
+ * Return $propertyName
+ *
+ * @return mixed
+ */
+EPM
+);
+    }
 
-        foreach ($node->props as $property) {
-            $setParam = new \PHPParser_Node_Param($property->name);
-            $setStmt = new \PHPParser_Node_Expr_Assign(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                ),
-                new \PHPParser_Node_Expr_Variable($property->name)
-            );
-            $returnStmt = new \PHPParser_Node_Stmt_Return(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                )
-            );
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('set'.ucfirst($property->name), array('stmts' => array($setStmt), 'params' => array($setParam)));
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('get'.ucfirst($property->name), array('stmts' => array($returnStmt)));
-        }
+    public function onGenerateSetter(GeneratorEvent $event)
+    {
+        $node = $event->getNode();
+        $propertyName = $node->params[0]->name;
+        $node->setDocComment(<<<EPM
+/**
+ * Set $propertyName
+ *
+ * @param mixed $propertyName
+ */
+EPM
+);
     }
 
     public function getSubscribedEvents()
     {
-        return array('onGenerateProperty');
+        return array('onGenerateGetter', 'onGenerateSetter', 'onGenerateProperty');
     }
 }
 

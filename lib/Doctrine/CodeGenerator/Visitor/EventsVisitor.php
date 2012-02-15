@@ -65,6 +65,10 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
             return;
         }
 
+        $event = self::$visitedClasses[$class];
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+        $this->visited->attach($node);
+
         if ($node instanceof \PHPParser_Node_Stmt_ClassMethod) {
             if (substr($node->name, 0, 3) == "set") {
                 $event = 'onGenerateSetter';
@@ -73,14 +77,12 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
             } else if ($node->name == "__construct") {
                 $event = 'onGenerateConstructor';
             } else {
-                $event = 'onGenerateMethod';
+                return;
             }
-        } else {
-            $event = self::$visitedClasses[$class];
-        }
 
-        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
-        $this->visited->attach($node);
+            $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+            $this->visited->attach($node);
+        }
     }
 }
 
