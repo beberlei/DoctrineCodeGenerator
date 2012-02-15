@@ -1,0 +1,21 @@
+{
+    "hash": "7fe49a149fca0970b81724b5a6d1f73b",
+    "packages": [
+        {
+            "package": "nikic\/php-parser",
+            "version": "master-dev"
+        },
+        {
+            "package": "symfony\/console",
+            "version": "2.1.0-dev"
+        },
+        {
+            "package": "symfony\/yaml",
+            "version": "2.1.0-dev"
+        },
+        {
+            "package": "doctrine\/common",
+            "version": "master-dev"
+        }
+    ]
+}

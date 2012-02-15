@@ -1,0 +1,12 @@
+generator:
+  destination: code
+  listeners:
+    Doctrine\CodeGenerator\Listener\GetterSetterListener: ~
+  source:
+    class: Doctrine\CodeGenerator\Source\ConfigSource
+    arguments:
+      classes:
+        TestClass:
+          properties:
+            foo: ~
+            bar: ~

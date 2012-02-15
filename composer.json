@@ -1,0 +1,14 @@
+{
+    "name": "doctrine/code-generator",
+    "require": {
+        "nikic/php-parser": "*",
+        "symfony/console": "*",
+        "symfony/yaml": "*",
+        "doctrine/common": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Doctrine\\CodeGenerator": "lib"
+        }
+    }
+}
