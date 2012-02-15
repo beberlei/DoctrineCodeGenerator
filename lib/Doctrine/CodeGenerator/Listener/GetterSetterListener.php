@@ -31,12 +31,21 @@ class GetterSetterListener implements \Doctrine\Common\EventSubscriber
         $class = $event->getParent($node);
 
         foreach ($node->props as $property) {
-            $getStmts = new \PHPParser_Node_Stmt_Return(
-                new \PHPParser_Node_Expr_PropertyFetch(new \PHPParser_Node_Expr_Variable('this'), $property->name));
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('set'.ucfirst($property->name));
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('get'.ucfirst($property->name), array('stmts' => array($getStmts)));
+            $setParam = new \PHPParser_Node_Param($property->name);
+            $setStmt = new \PHPParser_Node_Expr_Assign(
+                new \PHPParser_Node_Expr_PropertyFetch(
+                    new \PHPParser_Node_Expr_Variable('this'), $property->name
+                ),
+                new \PHPParser_Node_Expr_Variable($property->name)
+            );
+            $returnStmt = new \PHPParser_Node_Stmt_Return(
+                new \PHPParser_Node_Expr_PropertyFetch(
+                    new \PHPParser_Node_Expr_Variable('this'), $property->name
+                )
+            );
+            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('set'.ucfirst($property->name), array('stmts' => array($setStmt), 'params' => array($setParam)));
+            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('get'.ucfirst($property->name), array('stmts' => array($returnStmt)));
         }
-        var_dump($class);
     }
 
     public function getSubscribedEvents()

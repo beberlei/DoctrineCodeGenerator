@@ -40,7 +40,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseStringClassWithProperties()
     {
-        $ast = $this->parser->parseString('<?php class Test { private $foo; public $bar; protected $baz; public function getFoo() { return $this->foo; } } ?>');
+        $ast = $this->parser->parseString('<?php class Test { private $foo; public $bar; protected $baz; public function getFoo() { return $this->foo; } public function setFoo($foo) { $this->foo = $foo;} } ?>');
         var_dump($ast);
     }
 }
