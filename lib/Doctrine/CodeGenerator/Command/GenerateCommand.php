@@ -63,6 +63,7 @@ EOF
         $source = new $sourceClass($config['generator']['source']['arguments']);
 
         $code = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
+        $container = new \Doctrine\CodeGenerator\MetadataContainer;
         $evm = new \Doctrine\Common\EventManager;
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if (!is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
@@ -70,6 +71,7 @@ EOF
             }
             $listener = new $listener($args);
             $listener->setCodeBuilder($code);
+            $listener->setMetadataContainer($container);
             $evm->addEventSubscriber($listener);
         }
         $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
