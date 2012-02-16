@@ -1,0 +1,11 @@
+generator:
+  destination: code
+  listeners:
+    Doctrine\CodeGenerator\Listener\TimestampableListener:
+      - "Entities\User"
+    Doctrine\CodeGenerator\Listener\GetterSetterListener: ~
+    Doctrine\CodeGenerator\Listener\DocListener: ~
+    Doctrine\CodeGenerator\Listener\FluentSetterListener: ~
+  source:
+    class: Doctrine\CodeGenerator\Source\ORMSource
+

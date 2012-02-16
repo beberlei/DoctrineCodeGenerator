@@ -20,27 +20,24 @@
 namespace Doctrine\CodeGenerator\Source;
 
 use Doctrine\CodeGenerator\GenerationProject;
-use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
+use Doctrine\CodeGenerator\MetadataContainer;
 
-class ConfigSource extends Source
+abstract class Source
 {
-    private $config;
-    public function __construct(array $config)
+    protected $code;
+    protected $metadata;
+
+    public function setCodeBuilder(CodeBuilder $builder)
     {
-        $this->config = $config;
+        $this->code = $builder;
     }
 
-    public function generate(GenerationProject $project)
+    public function setMetadataContainer(MetadataContainer $container)
     {
-        foreach ($this->config['classes'] as $className => $struct) {
-            $builder = ClassBuilder::newClass($className);
-            foreach ($struct['properties'] as $propertyName => $propertyStruct) {
-                $builder->appendProperty($propertyName);
-            }
-
-            $file = $project->getEmptyClass($className);
-            $file->append($builder->getNode());
-        }
+        $this->metadata = $container;
     }
+
+    abstract public function generate(GenerationProject $project);
 }
 

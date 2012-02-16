@@ -57,11 +57,20 @@ EOF
             mkdir($destination, 0777, true);
         }
 
+        // TODO: Factory
         $sourceClass = $config['generator']['source']['class'];
-        $source = new $sourceClass($config['generator']['source']['arguments']);
+        if ($sourceClass == 'Doctrine\CodeGenerator\Source\ORMSource') {
+            $em = $this->getHelper('em')->getEntityManager();
+            $source = new \Doctrine\CodeGenerator\Source\ORMSource($em);
+        } else {
+            $source = new $sourceClass($config['generator']['source']['arguments']);
+        }
 
         $code = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
         $container = new \Doctrine\CodeGenerator\MetadataContainer;
+        $source->setCodeBuilder($code);
+        $source->setMetadataContainer($container);
+
         $evm = new \Doctrine\Common\EventManager;
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if (!is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {

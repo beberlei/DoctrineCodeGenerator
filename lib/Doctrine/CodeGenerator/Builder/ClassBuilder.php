@@ -95,6 +95,24 @@ class ClassBuilder
     }
 
     /**
+     * @param string $name
+     * @return PHPParser_Node_Stmt_PropertyProperty
+     */
+    public function getProperty($name)
+    {
+        foreach ($this->class->stmts as $stmt) {
+            if ($stmt instanceof \PHPParser_Node_Stmt_Property) {
+                foreach ($stmt->props as $property) {
+                    if ($property->name === $name) {
+                        return $property;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return ClassBuilder
      */
     public function append($stmt)

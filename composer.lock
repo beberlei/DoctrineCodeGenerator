@@ -1,5 +1,5 @@
 {
-    "hash": "7fe49a149fca0970b81724b5a6d1f73b",
+    "hash": "f4772676ba72899153d6353dd0715394",
     "packages": [
         {
             "package": "nikic\/php-parser",
@@ -15,7 +15,15 @@
         },
         {
             "package": "doctrine\/common",
-            "version": "master-dev"
+            "version": "2.2.0"
+        },
+        {
+            "package": "doctrine\/dbal",
+            "version": "2.2.1"
+        },
+        {
+            "package": "doctrine\/orm",
+            "version": "2.2.0"
         }
     ]
 }

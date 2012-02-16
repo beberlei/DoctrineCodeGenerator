@@ -6,6 +6,9 @@
         "symfony/yaml": "*",
         "doctrine/common": "*"
     },
+    "recommend": {
+        "doctrine/orm": "2.2.0"
+    },
     "autoload": {
         "psr-0": {
             "Doctrine\\CodeGenerator": "lib"

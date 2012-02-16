@@ -21,24 +21,42 @@ namespace Doctrine\CodeGenerator\Source;
 
 use Doctrine\CodeGenerator\GenerationProject;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 
-class ConfigSource extends Source
+class ORMSource extends Source
 {
-    private $config;
-    public function __construct(array $config)
+    private $em;
+    public function __construct(EntityManager $em)
     {
-        $this->config = $config;
+        $this->em = $em;
     }
 
     public function generate(GenerationProject $project)
     {
-        foreach ($this->config['classes'] as $className => $struct) {
-            $builder = ClassBuilder::newClass($className);
-            foreach ($struct['properties'] as $propertyName => $propertyStruct) {
-                $builder->appendProperty($propertyName);
+        $metadata = new DisconnectedClassMetadataFactory();
+        $metadata->setEntityManager($this->em);
+
+        foreach ($metadata->getAllMetadata() as $metadata) {
+            $builder = ClassBuilder::newClass($metadata->name);
+
+            foreach ($metadata->fieldMappings as $fieldName => $fieldMapping) {
+                $builder->appendProperty($fieldName);
+                $property = $builder->getProperty($fieldName);
+
+                $this->metadata->addTag($property, 'column');
+                $this->metadata->setAttribute($property, 'type', $fieldMapping['type']);
             }
 
-            $file = $project->getEmptyClass($className);
+            foreach ($metadata->associationMappings as $assocName => $assoc) {
+                $builder->appendProperty($assocName);
+                $property = $builder->getProperty($assocName);
+
+                $this->metadata->addTag($property, 'association');
+                $this->metadata->setAttribute($property, 'type', $assoc['targetEntity']);
+            }
+
+            $file = $project->getEmptyClass($metadata->name);
             $file->append($builder->getNode());
         }
     }

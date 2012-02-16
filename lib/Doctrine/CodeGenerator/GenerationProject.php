@@ -80,8 +80,13 @@ class GenerationProject
     {
         $prettyPrinter = new \PHPParser_PrettyPrinter_Zend; // TODO: Configurable
         foreach ($this->files as $file) {
+            $path = $this->root . "/" . $file->getPath();
+            $dir = dirname($path);
+            if (!file_exists($dir)) {
+                mkdir($dir, 0777, true);
+            }
             $code = "<?php\n" . $file->prettyPrint($prettyPrinter);
-            file_put_contents($this->root . "/" . $file->getPath(), $code);
+            file_put_contents($path, $code);
         }
     }
 }
