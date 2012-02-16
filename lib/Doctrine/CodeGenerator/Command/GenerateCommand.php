@@ -54,7 +54,7 @@ EOF
             throw new \RuntimeException;
         }
 
-        $destination = realpath(dirname($path) . "/" . $config['generator']['destination']);
+        $destination = realpath(dirname($path)) . "/". $config['generator']['destination'];
         if (!file_exists($destination)) {
             mkdir($destination, 0777, true);
         }
