@@ -56,11 +56,12 @@ EPM
     {
         $node = $event->getNode();
         $propertyName = $node->params[0]->name;
+        $type = $node->params[0]->type ?: "mixed";
         $node->setDocComment(<<<EPM
 /**
  * Set $propertyName
  *
- * @param mixed $propertyName
+ * @param $type \$$propertyName
  */
 EPM
 );
