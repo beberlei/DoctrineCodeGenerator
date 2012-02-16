@@ -29,23 +29,46 @@ class DocListener extends AbstractCodeListener
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node = $event->getNode();
+        $type = $this->metadata->getAttribute($node->props[0], 'type') ?: 'mixed';
         $node->setDocComment(<<<EPM
 /**
- * @var mixed
+ * @var $type
  */
 EPM
 );
     }
 
+    private function getMethodsPropertyType($node)
+    {
+        $property = $this->metadata->getAttribute($node, 'property');
+        if ($property) {
+            $type = $this->metadata->getAttribute($property, 'type');
+        } else {
+            $type = 'mixed';
+        }
+        return $type;
+    }
+
+    private function getPropertyName($node)
+    {
+        $property = $this->metadata->getAttribute($node, 'property');
+        if ($property) {
+            return $property->name;
+        }
+        return lcfirst(substr($node->name, 3));
+    }
+
     public function onGenerateGetter(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $propertyName = lcfirst(substr($node->name, 3));
+        $type = $this->getMethodsPropertyType($node);
+        $propertyName = $this->getPropertyName($node);
+
         $node->setDocComment(<<<EPM
 /**
  * Return $propertyName
  *
- * @return mixed
+ * @return $type
  */
 EPM
 );
@@ -54,8 +77,9 @@ EPM
     public function onGenerateSetter(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $propertyName = $node->params[0]->name;
-        $type = $node->params[0]->type ?: "mixed";
+        $type = $this->getMethodsPropertyType($node);
+        $propertyName = $this->getPropertyName($node);
+
         $node->setDocComment(<<<EPM
 /**
  * Set $propertyName

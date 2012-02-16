@@ -76,6 +76,18 @@ class ClassBuilder
         return false;
     }
 
+    public function getMethod($name)
+    {
+        foreach ($this->class->stmts as $stmt) {
+            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
+                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
+                strtolower($stmt->name) === strtolower($name)) {
+                return $stmt;
+            }
+        }
+        return null;
+    }
+
     /**
      * Add a new property with given name.
      *

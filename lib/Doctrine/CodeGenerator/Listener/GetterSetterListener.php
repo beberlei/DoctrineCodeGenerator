@@ -49,6 +49,9 @@ class GetterSetterListener extends AbstractCodeListener
                 ->appendMethod('get' . ucfirst($property->name))
                     ->append($code->returnStmt($code->instanceVariable($property->name)))
                 ->end();
+
+            $this->metadata->setAttribute($builder->getMethod('set' . ucfirst($property->name)), 'property', $property);
+            $this->metadata->setAttribute($builder->getMethod('get' . ucfirst($property->name)), 'property', $property);
         }
     }
 
