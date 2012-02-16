@@ -17,30 +17,43 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator\Source;
+namespace Doctrine\CodeGenerator\Builder;
 
-use Doctrine\CodeGenerator\GenerationProject;
-use Doctrine\CodeGenerator\Builder\ClassBuilder;
-
-class ConfigSource
+class StmtBuilder
 {
-    private $config;
-    public function __construct(array $config)
+    /**
+     * @param string $name
+     * @return PHPParser_Node_Expr_PropertyFetch
+     */
+    public function instanceVariable($name)
     {
-        $this->config = $config;
+        return new \PHPParser_Node_Expr_PropertyFetch(
+            new \PHPParser_Node_Expr_Variable('this'), $name
+        );
     }
 
-    public function generate(GenerationProject $project)
+    /**
+     * @return PHPParser_Node_Expr_Variable
+     */
+    public function variable($name)
     {
-        foreach ($this->config['classes'] as $className => $struct) {
-            $builder = ClassBuilder::newClass($className);
-            foreach ($struct['properties'] as $propertyName => $propertyStruct) {
-                $builder->appendProperty($propertyName);
-            }
+        return new \PHPParser_Node_Expr_Variable($name);
+    }
 
-            $file = $project->getEmptyClass($className);
-            $file->append($builder->getNode());
-        }
+    /**
+     * @return PHPParser_Node_Stmt_Return
+     */
+    public function returnStmt($expr)
+    {
+        return new \PHPParser_Node_Stmt_Return($expr);
+    }
+
+    /**
+     * @return PHPParser_Node_Expr_Assign
+     */
+    public function assignment($left, $right)
+    {
+        return new \PHPParser_Node_Expr_Assign($left, $right);
     }
 }
 

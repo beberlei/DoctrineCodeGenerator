@@ -21,6 +21,8 @@ namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\Builder\StmtBuilder;
 
 /**
  * Each property is turned to protected and getters/setters are added.
@@ -33,22 +35,18 @@ class GetterSetterListener implements EventSubscriber
         $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
 
         $class = $event->getParent($node);
+        $builder = new ClassBuilder($class);
+        $code = new StmtBuilder();
 
         foreach ($node->props as $property) {
-            $setParam = new \PHPParser_Node_Param($property->name);
-            $setStmt = new \PHPParser_Node_Expr_Assign(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                ),
-                new \PHPParser_Node_Expr_Variable($property->name)
-            );
-            $returnStmt = new \PHPParser_Node_Stmt_Return(
-                new \PHPParser_Node_Expr_PropertyFetch(
-                    new \PHPParser_Node_Expr_Variable('this'), $property->name
-                )
-            );
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('set'.ucfirst($property->name), array('stmts' => array($setStmt), 'params' => array($setParam)));
-            $class->stmts[] = new \PHPParser_Node_Stmt_ClassMethod('get'.ucfirst($property->name), array('stmts' => array($returnStmt)));
+            $builder
+                ->appendMethod('set' . ucfirst($property->name))
+                    ->addParam($property->name)
+                    ->append($code->assignment($code->instanceVariable($property->name), $code->variable($property->name)))
+                ->end()
+                ->appendMethod('get' . ucfirst($property->name))
+                    ->append($code->returnStmt($code->instanceVariable($property->name)))
+                ->end();
         }
     }
 

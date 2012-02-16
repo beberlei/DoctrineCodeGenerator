@@ -39,6 +39,12 @@ class GenerationProject
         }
     }
 
+    public function getEmptyClass($className)
+    {
+        $path = str_replace(array("\\", "_"), "/", $className) . ".php";
+        return $this->getEmptyFile($path);
+    }
+
     public function getEmptyFile($path)
     {
         $this->files[$path] = new File($path, array());

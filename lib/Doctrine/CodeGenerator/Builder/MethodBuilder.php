@@ -17,30 +17,44 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator\Source;
+namespace Doctrine\CodeGenerator\Builder;
 
-use Doctrine\CodeGenerator\GenerationProject;
-use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use PHPParser_Node_Stmt_ClassMethod;
+use PHPParser_Node_Param;
 
-class ConfigSource
+class MethodBuilder
 {
-    private $config;
-    public function __construct(array $config)
+    private $node;
+    private $classBuilder;
+
+    public function __construct(PHPParser_Node_Stmt_ClassMethod $node, ClassBuilder $classBuilder)
     {
-        $this->config = $config;
+        $this->node = $node;
+        $this->classBuilder = $classBuilder;
     }
 
-    public function generate(GenerationProject $project)
+    public function end()
     {
-        foreach ($this->config['classes'] as $className => $struct) {
-            $builder = ClassBuilder::newClass($className);
-            foreach ($struct['properties'] as $propertyName => $propertyStruct) {
-                $builder->appendProperty($propertyName);
-            }
+        return $this->classBuilder;
+    }
 
-            $file = $project->getEmptyClass($className);
-            $file->append($builder->getNode());
-        }
+    public function getNode()
+    {
+        return $this->node;
+    }
+
+    public function addParam($name, $default = null, $type = null, $byRef = false)
+    {
+        $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
+        $this->node->params[] = $param;
+        return $this;
+    }
+
+    public function append($stmt)
+    {
+        $this->node->stmts[] = $stmt;
+        return $this;
     }
 }
+
 
