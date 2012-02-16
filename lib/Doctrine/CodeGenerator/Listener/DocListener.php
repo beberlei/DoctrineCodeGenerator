@@ -20,12 +20,11 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\Common\EventSubscriber;
 
 /**
  * Each property is turned to protected and getters/setters are added.
  */
-class DocListener implements EventSubscriber
+class DocListener extends AbstractCodeListener
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
@@ -65,11 +64,6 @@ EPM
  */
 EPM
 );
-    }
-
-    public function getSubscribedEvents()
-    {
-        return array('onGenerateGetter', 'onGenerateSetter', 'onGenerateProperty');
     }
 }
 

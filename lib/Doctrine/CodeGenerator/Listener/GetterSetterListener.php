@@ -20,14 +20,12 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
-use Doctrine\CodeGenerator\Builder\StmtBuilder;
 
 /**
  * Each property is turned to protected and getters/setters are added.
  */
-class GetterSetterListener implements EventSubscriber
+class GetterSetterListener extends AbstractCodeListener
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
@@ -36,7 +34,7 @@ class GetterSetterListener implements EventSubscriber
 
         $class = $event->getParent($node);
         $builder = new ClassBuilder($class);
-        $code = new StmtBuilder();
+        $code = $this->code;
 
         foreach ($node->props as $property) {
             if ($builder->hasMethod('set' . $property->name) || $builder->hasMethod('get' . $property->name)) {

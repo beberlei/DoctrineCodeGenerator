@@ -19,21 +19,36 @@
 
 namespace Doctrine\CodeGenerator\Listener;
 
-use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\CodeGenerator\Builder\MethodBuilder;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
+use Doctrine\CodeGenerator\MetadataContainer;
 
-/**
- * Each property is turned to protected and getters/setters are added.
- */
-class FluentSetterListener extends AbstractCodeListener
+abstract class AbstractCodeListener implements EventSubscriber
 {
-    public function onGenerateSetter(GeneratorEvent $event)
+    protected $code;
+    protected $metadata;
+
+    public function setCodeBuilder(CodeBuilder $builder)
     {
-        $node = $event->getNode();
-        $code = $this->code;
-        $builder = new MethodBuilder($node);
-        $builder->append($code->returnStmt($code->variable('this')));
+        $this->code = $builder;
+    }
+
+    public function setMetadataContainer(MetadataContainer $container)
+    {
+        $this->metadata = $container;
+    }
+
+    public function getSubscribedEvents()
+    {
+        $methods = get_class_methods($this);
+        $eventMethods = array();
+        foreach ($methods as $method) {
+            if (substr($method, 0, 2) === "on") {
+                $eventMethods[] = $method;
+            }
+        }
+
+        return $eventMethods;
     }
 }
 

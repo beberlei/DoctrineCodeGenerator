@@ -19,7 +19,7 @@
 
 namespace Doctrine\CodeGenerator\Builder;
 
-class StmtBuilder
+class CodeBuilder
 {
     private $parser;
 

@@ -20,11 +20,10 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
 use Doctrine\CodeGenerator\Builder\StmtBuilder;
 
-class TimestampableListener implements EventSubscriber
+class TimestampableListener extends AbstractCodeListener
 {
     private $classes;
 
@@ -40,7 +39,7 @@ class TimestampableListener implements EventSubscriber
             return;
         }
 
-        $code = new StmtBuilder();
+        $code = $this->code;
         $builder = new ClassBuilder($class);
         $builder->appendProperty('updated')
                 ->appendProperty('created')
@@ -70,11 +69,6 @@ public function getUpdated()
 ETS
                 ))
             ;
-    }
-
-    public function getSubscribedEvents()
-    {
-        return array('onGenerateClass');
     }
 }
 

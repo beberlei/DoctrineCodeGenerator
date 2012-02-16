@@ -62,9 +62,14 @@ EOF
         $sourceClass = $config['generator']['source']['class'];
         $source = new $sourceClass($config['generator']['source']['arguments']);
 
+        $code = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
         $evm = new \Doctrine\Common\EventManager;
         foreach ($config['generator']['listeners'] as $listener => $args) {
+            if (!is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
+                throw new \RuntimeException("Listener $listener has to extend AbstractCodeListener");
+            }
             $listener = new $listener($args);
+            $listener->setCodeBuilder($code);
             $evm->addEventSubscriber($listener);
         }
         $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();

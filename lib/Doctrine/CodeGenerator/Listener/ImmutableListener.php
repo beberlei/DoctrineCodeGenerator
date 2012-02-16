@@ -19,21 +19,7 @@
 
 namespace Doctrine\CodeGenerator\Listener;
 
-use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\Common\EventSubscriber;
-use Doctrine\CodeGenerator\Builder\MethodBuilder;
-
-/**
- * Each property is turned to protected and getters/setters are added.
- */
-class FluentSetterListener extends AbstractCodeListener
+class ImmutableListener extends AbstractCodeListener
 {
-    public function onGenerateSetter(GeneratorEvent $event)
-    {
-        $node = $event->getNode();
-        $code = $this->code;
-        $builder = new MethodBuilder($node);
-        $builder->append($code->returnStmt($code->variable('this')));
-    }
 }
 
