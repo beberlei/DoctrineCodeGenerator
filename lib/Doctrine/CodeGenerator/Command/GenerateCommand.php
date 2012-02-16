@@ -68,15 +68,17 @@ EOF
             $evm->addEventSubscriber($listener);
         }
         $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
-        $visitors = array(
-            $parent,
-            new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm, $parent)
-        );
+        $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm, $parent);
+        $visitors = array($parent, $eventvisitor);
 
         $project = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
         $source->generate($project);
-        $project->traverse();
-        $project->traverse();
+
+        $lc = 0;
+        do {
+            $project->traverse();
+            $lc++;
+        } while($eventvisitor->getCounter() > 0 && $lc < 100);
         $project->write();
     }
 }

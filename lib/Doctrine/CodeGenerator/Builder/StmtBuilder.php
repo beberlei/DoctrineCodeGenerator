@@ -27,6 +27,7 @@ class StmtBuilder
     {
         $this->parser = $parser ?: new \PHPParser_Parser();
     }
+
     /**
      * @param string $name
      * @return PHPParser_Node_Expr_PropertyFetch

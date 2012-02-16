@@ -45,6 +45,7 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         'PHPParser_Node_Param' => 'onGenerateParameter',
     );
     private $parentStorage;
+    private $counter;
 
     public function __construct(EventManager $evm, $parentStorage = null)
     {
@@ -53,12 +54,45 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         $this->parentStorage = $parentStorage;
     }
 
+    public function beforeTraverse(array $nodes)
+    {
+        $this->counter = 0;
+    }
+
+    public function getCounter()
+    {
+        return $this->counter;
+    }
+
     public function enterNode(PHPParser_Node $node)
     {
         if ($this->visited->contains($node)) {
             return;
         }
 
+        $event = $this->getEvent($node);
+        if (!$event) {
+            return;
+        }
+
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+        $this->visited->attach($node);
+        $this->counter++;
+    }
+
+    public function leaveNode(PHPParser_Node $node)
+    {
+        $event = $this->getEvent($node);
+        if (!$event) {
+            return;
+        }
+        $event = "post" . substr($event, 2);
+
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+    }
+
+    private function getEvent($node)
+    {
         $class = get_class($node);
 
         if ( ! isset(self::$visitedClasses[$class])) {
@@ -66,8 +100,6 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         }
 
         $event = self::$visitedClasses[$class];
-        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
-        $this->visited->attach($node);
 
         if ($node instanceof \PHPParser_Node_Stmt_ClassMethod) {
             if (substr($node->name, 0, 3) == "set") {
@@ -76,13 +108,9 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
                 $event = 'onGenerateGetter';
             } else if ($node->name == "__construct") {
                 $event = 'onGenerateConstructor';
-            } else {
-                return;
             }
-
-            $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
-            $this->visited->attach($node);
         }
+        return $event;
     }
 }
 
