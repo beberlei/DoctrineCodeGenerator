@@ -31,9 +31,7 @@ class GenerateCommand extends Command
     {
         $this
             ->setDefinition(array(
-                new InputArgument('configfile', InputArgument::OPTIONAL, 'The generator.yml file path'),
-                new InputOption('xml', null, InputOption::VALUE_NONE, 'To output help as XML'),
-                new InputOption('raw', null, InputOption::VALUE_NONE, 'To output raw command list')
+                new InputArgument('configfile', InputArgument::REQUIRED, 'The generator.yml file path'),
             ))
             ->setName('code:generate')
             ->setDescription('Generate code')
