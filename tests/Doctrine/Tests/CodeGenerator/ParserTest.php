@@ -37,16 +37,5 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new \Doctrine\CodeGenerator\Parser($traverser);
         $ast = $this->parser->parseString('phpinfo();');
     }
-
-    public function testParseStringClassWithProperties()
-    {
-        $ast = $this->parser->parseString('<?php class Test { private $foo; public $bar; protected $baz; public function getFoo() { return $this->foo; } public function setFoo($foo) { $this->foo = $foo;} } ?>');
-    }
-
-    public function testParseStringNEwDateTime()
-    {
-        $ast = $this->parser->parseString('<?php new \DateTime(); ?>');
-        var_dump($ast);
-    }
 }
 

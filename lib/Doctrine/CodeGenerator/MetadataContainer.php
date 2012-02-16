@@ -52,7 +52,7 @@ class MetadataContainer
         return false;
     }
 
-    public function addAttribute(PHPParser_Node $node, $name, $value)
+    public function setAttribute(PHPParser_Node $node, $name, $value)
     {
         $this->nodes->attach($node);
         $values = $this->nodes[$node];
@@ -64,7 +64,7 @@ class MetadataContainer
     public function getAttribute(PHPParser_Node $node, $name)
     {
         if (!$this->nodes->contains($node)) {
-            return false;
+            return null;
         }
         $values = $this->nodes[$node];
         if (isset($values['attributes'][$name])) {
