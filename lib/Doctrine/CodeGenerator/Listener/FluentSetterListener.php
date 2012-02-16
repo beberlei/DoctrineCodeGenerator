@@ -21,6 +21,8 @@ namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\CodeGenerator\Builder\MethodBuilder;
+use Doctrine\CodeGenerator\Builder\StmtBuilder;
 
 /**
  * Each property is turned to protected and getters/setters are added.
@@ -30,9 +32,9 @@ class FluentSetterListener implements EventSubscriber
     public function onGenerateSetter(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $node->stmts[] = new \PHPParser_Node_Stmt_Return(
-            new \PHPParser_Node_Expr_Variable('this')
-        );
+        $code = new StmtBuilder;
+        $builder = new MethodBuilder($node);
+        $builder->append($code->returnStmt($code->variable('this')));
     }
 
     public function getSubscribedEvents()

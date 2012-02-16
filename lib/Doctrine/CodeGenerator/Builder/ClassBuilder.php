@@ -55,12 +55,25 @@ class ClassBuilder
     public function findMethod($name)
     {
         foreach ($this->class->stmts as $stmt) {
-            if ($stmt instanceof PHPParser_Node_Stmt_ClassMethod &&
-                $stmt->name === $name) {
+            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
+                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
+                strtolower($stmt->name) === strtolower($name)) {
                 return $stmt;
             }
         }
-        return null;
+        return $this->appendMethod($name);
+    }
+
+    public function hasMethod($name)
+    {
+        foreach ($this->class->stmts as $stmt) {
+            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
+                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
+                strtolower($stmt->name) === strtolower($name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -78,6 +91,17 @@ class ClassBuilder
         $pp = new \PHPParser_Node_Stmt_PropertyProperty($name);
         $property = new \PHPParser_Node_Stmt_Property($modifiers, array($pp));
         $this->class->stmts[] = $property;
+        return $this;
+    }
+
+    /**
+     * @return ClassBuilder
+     */
+    public function append($stmt)
+    {
+        foreach ((array)$stmt as $s) {
+            $this->class->stmts[] = $s;
+        }
         return $this;
     }
 }

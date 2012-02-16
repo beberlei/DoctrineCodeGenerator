@@ -21,6 +21,12 @@ namespace Doctrine\CodeGenerator\Builder;
 
 class StmtBuilder
 {
+    private $parser;
+
+    public function __construct(\PHPParser_Parser $parser = null)
+    {
+        $this->parser = $parser ?: new \PHPParser_Parser();
+    }
     /**
      * @param string $name
      * @return PHPParser_Node_Expr_PropertyFetch
@@ -54,6 +60,22 @@ class StmtBuilder
     public function assignment($left, $right)
     {
         return new \PHPParser_Node_Expr_Assign($left, $right);
+    }
+
+    public function code($string)
+    {
+        return $this->parser->parse(new \PHPParser_Lexer("<?php\n " . $string . "?>"));
+    }
+
+    public function classCode($string)
+    {
+        $stmts = $this->parser->parse(new \PHPParser_Lexer("<?php\n class Dummy { " . $string . " }?>"));
+        return $stmts[0]->stmts;
+    }
+
+    public function instantiate($className)
+    {
+        return new \PHPParser_Node_Expr_New(new \PHPParser_Node_Name_FullyQualified($className));
     }
 }
 

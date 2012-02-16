@@ -27,7 +27,7 @@ class MethodBuilder
     private $node;
     private $classBuilder;
 
-    public function __construct(PHPParser_Node_Stmt_ClassMethod $node, ClassBuilder $classBuilder)
+    public function __construct(PHPParser_Node_Stmt_ClassMethod $node, ClassBuilder $classBuilder = null)
     {
         $this->node = $node;
         $this->classBuilder = $classBuilder;
@@ -43,6 +43,9 @@ class MethodBuilder
         return $this->node;
     }
 
+    /**
+     * @return MethodBuilder
+     */
     public function addParam($name, $default = null, $type = null, $byRef = false)
     {
         $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
@@ -50,9 +53,20 @@ class MethodBuilder
         return $this;
     }
 
+    /**
+     * @return MethodBuilder
+     */
     public function append($stmt)
     {
-        $this->node->stmts[] = $stmt;
+        if (!is_array($stmt)) {
+            $stmt = array($stmt);
+        }
+        foreach ($stmt as $s) {
+            if (!($s instanceof \PHPParser_Node)) {
+                throw new \InvalidArgumentException("$s is not a node.");
+            }
+            $this->node->stmts[] = $s;
+        }
         return $this;
     }
 }

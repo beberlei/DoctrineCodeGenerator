@@ -1,6 +1,8 @@
 generator:
   destination: code
   listeners:
+    Doctrine\CodeGenerator\Listener\TimestampableListener:
+      - "TestClass"
     Doctrine\CodeGenerator\Listener\GetterSetterListener: ~
     Doctrine\CodeGenerator\Listener\DocListener: ~
     Doctrine\CodeGenerator\Listener\FluentSetterListener: ~

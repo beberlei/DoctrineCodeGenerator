@@ -24,39 +24,57 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
 use Doctrine\CodeGenerator\Builder\StmtBuilder;
 
-/**
- * Each property is turned to protected and getters/setters are added.
- */
-class GetterSetterListener implements EventSubscriber
+class TimestampableListener implements EventSubscriber
 {
-    public function onGenerateProperty(GeneratorEvent $event)
+    private $classes;
+
+    public function __construct(array $classes = array())
     {
-        $node = $event->getNode();
-        $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
+        $this->classes = $classes;
+    }
 
-        $class = $event->getParent($node);
-        $builder = new ClassBuilder($class);
-        $code = new StmtBuilder();
-
-        foreach ($node->props as $property) {
-            if ($builder->hasMethod('set' . $property->name) || $builder->hasMethod('get' . $property->name)) {
-                continue;
-            }
-
-            $builder
-                ->appendMethod('set' . ucfirst($property->name))
-                    ->addParam($property->name)
-                    ->append($code->assignment($code->instanceVariable($property->name), $code->variable($property->name)))
-                ->end()
-                ->appendMethod('get' . ucfirst($property->name))
-                    ->append($code->returnStmt($code->instanceVariable($property->name)))
-                ->end();
+    public function onGenerateClass(GeneratorEvent $event)
+    {
+        $class = $event->getNode();
+        if ( !in_array($class->name, $this->classes)) {
+            return;
         }
+
+        $code = new StmtBuilder();
+        $builder = new ClassBuilder($class);
+        $builder->appendProperty('updated')
+                ->appendProperty('created')
+                ->findMethod('__construct')
+                    ->append(
+                        $code->assignment(
+                            $code->instanceVariable('created'),
+                            $code->instantiate('DateTime')
+                        )
+                    )
+                ->end()
+                ->append($code->classCode(<<<ETS
+public function getCreated()
+{
+    return \$this->created;
+}
+
+public function setUpdated(\DateTime \$date)
+{
+    \$this->updated = \$date;
+}
+
+public function getUpdated()
+{
+    return \$this->updated;
+}
+ETS
+                ))
+            ;
     }
 
     public function getSubscribedEvents()
     {
-        return array('onGenerateProperty');
+        return array('onGenerateClass');
     }
 }
 
