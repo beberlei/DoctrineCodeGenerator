@@ -22,11 +22,13 @@ namespace Doctrine\CodeGenerator\Listener;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\CodeGenerator\Builder\CodeBuilder;
 use Doctrine\CodeGenerator\MetadataContainer;
+use Doctrine\CodeGenerator\GenerationProject;
 
 abstract class AbstractCodeListener implements EventSubscriber
 {
     protected $code;
     protected $metadata;
+    protected $project;
 
     public function setCodeBuilder(CodeBuilder $builder)
     {
@@ -36,6 +38,11 @@ abstract class AbstractCodeListener implements EventSubscriber
     public function setMetadataContainer(MetadataContainer $container)
     {
         $this->metadata = $container;
+    }
+
+    public function setProject(GenerationProject $project)
+    {
+        $this->project = $project;
     }
 
     public function getSubscribedEvents()

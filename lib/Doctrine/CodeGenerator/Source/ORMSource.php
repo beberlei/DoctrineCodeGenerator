@@ -26,18 +26,16 @@ use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 
 class ORMSource extends Source
 {
-    private $em;
-    public function __construct(EntityManager $em)
+    private $metadataFactory;
+
+    public function __construct($metadata)
     {
-        $this->em = $em;
+        $this->metadataFactory = $metadata;
     }
 
     public function generate(GenerationProject $project)
     {
-        $metadata = new DisconnectedClassMetadataFactory();
-        $metadata->setEntityManager($this->em);
-
-        foreach ($metadata->getAllMetadata() as $metadata) {
+        foreach ($this->metadataFactory->getAllMetadata() as $metadata) {
             $builder = ClassBuilder::newClass($metadata->name);
 
             foreach ($metadata->fieldMappings as $fieldName => $fieldMapping) {
@@ -46,6 +44,7 @@ class ORMSource extends Source
 
                 $this->metadata->addTag($property, 'column');
                 $this->metadata->setAttribute($property, 'type', $fieldMapping['type']);
+                $this->metadata->setAttribute($property, 'mapping', $fieldMapping);
             }
 
             foreach ($metadata->associationMappings as $assocName => $assoc) {
@@ -54,6 +53,7 @@ class ORMSource extends Source
 
                 $this->metadata->addTag($property, 'association');
                 $this->metadata->setAttribute($property, 'type', $assoc['targetEntity']);
+                $this->metadata->setAttribute($property, 'mapping', $assoc);
             }
 
             $file = $project->getEmptyClass($metadata->name);

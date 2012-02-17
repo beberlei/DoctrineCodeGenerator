@@ -31,26 +31,36 @@ use PHPParser_Node;
 class ParentVisitor extends PHPParser_NodeVisitorAbstract
 {
     private $class;
-    private $parents;
+    private $parents = array();
+    private $container;
+
+    public function __construct($container)
+    {
+        $this->container = $container;
+    }
 
     public function enterNode(PHPParser_Node $node)
     {
         if ($node instanceof \PHPParser_Node_Stmt_Class) {
             $this->class = $node;
         } else if ($node instanceof \PHPParser_Node_Stmt_ClassMethod) {
-            $this->parents[spl_object_hash($node)] = $this->class;
+            $this->container->setClassFor($node, $this->class);
         } else if ($node instanceof \PHPParser_Node_Stmt_PropertyProperty) {
-            $this->parents[spl_object_hash($node)] = $this->class;
+            $this->container->setClassFor($node, $this->class);
         } else if ($node instanceof \PHPParser_Node_Stmt_Property) {
-            $this->parents[spl_object_hash($node)] = $this->class;
+            $this->container->setClassFor($node, $this->class);
+        } else if ($node instanceof \PHPParser_Node_Stmt_ClassConst) {
+            $this->container->setClassFor($node, $this->class);
         }
+        $parent = end($this->parents);
+        if ($parent) {
+            $this->container->setParent($node, $parent);
+        }
+        $this->parents[] = $node;
     }
 
-    public function getParent(PHPParser_Node $node)
+    public function leaveNode(PHPParser_Node $node)
     {
-        if (isset ($this->parents[spl_object_hash($node)])) {
-            return $this->parents[spl_object_hash($node)];
-        }
-        return null;
+        array_pop($this->parents);
     }
 }

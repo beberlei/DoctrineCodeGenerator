@@ -30,28 +30,31 @@ class GetterSetterListener extends AbstractCodeListener
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node = $event->getNode();
-        $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED; // set protected
+        $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED;
 
-        $class = $event->getParent($node);
+        $class = $this->metadata->getParent($node);
         $builder = new ClassBuilder($class);
         $code = $this->code;
 
         foreach ($node->props as $property) {
-            if ($builder->hasMethod('set' . $property->name) || $builder->hasMethod('get' . $property->name)) {
+            $setName = 'set' . ucfirst($property->name);
+            $getName = 'get' . ucfirst($property->name);
+
+            if ($builder->hasMethod($setName) || $builder->hasMethod($getName)) {
                 continue;
             }
 
             $builder
-                ->appendMethod('set' . ucfirst($property->name))
+                ->appendMethod($setName)
                     ->addParam($property->name)
                     ->append($code->assignment($code->instanceVariable($property->name), $code->variable($property->name)))
                 ->end()
-                ->appendMethod('get' . ucfirst($property->name))
+                ->appendMethod($getName)
                     ->append($code->returnStmt($code->instanceVariable($property->name)))
                 ->end();
 
-            $this->metadata->setAttribute($builder->getMethod('set' . ucfirst($property->name)), 'property', $property);
-            $this->metadata->setAttribute($builder->getMethod('get' . ucfirst($property->name)), 'property', $property);
+            $this->metadata->setAttribute($builder->getMethod($setName), 'property', $property);
+            $this->metadata->setAttribute($builder->getMethod($getName), 'property', $property);
         }
     }
 

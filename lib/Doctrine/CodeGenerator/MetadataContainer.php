@@ -21,6 +21,7 @@ namespace Doctrine\CodeGenerator;
 
 use SplObjectStorage;
 use PHPParser_Node;
+use PHPParser_Node_Stmt_Class;
 
 class MetadataContainer
 {
@@ -71,6 +72,46 @@ class MetadataContainer
             return $values['attributes'][$name];
         }
         return null;
+    }
+
+    public function setClassFor(PHPParser_Node $node, PHPParser_Node_Stmt_Class $class)
+    {
+        $this->nodes->attach($node);
+        $values = $this->nodes[$node];
+        $values['class']= $class;
+        $this->nodes[$node] = $values;
+    }
+
+    public function getClassFor(PHPParser_Node $node)
+    {
+        if (!$this->nodes->contains($node)) {
+            throw new \InvalidArgumentException("Not a managed node!");
+        }
+        $values = $this->nodes[$node];
+        if ( ! isset($values['class'])) {
+            throw new \InvalidArgumentException("This node has no class.");
+        }
+        return $values['class'];
+    }
+
+    public function setParent(PHPParser_Node $node, PHPParser_Node $parent)
+    {
+        $this->nodes->attach($node);
+        $values = $this->nodes[$node];
+        $values['parent']= $parent;
+        $this->nodes[$node] = $values;
+    }
+
+    public function getParent(PHPParser_Node $node)
+    {
+        if (!$this->nodes->contains($node)) {
+            throw new \InvalidArgumentException("Not a managed node!");
+        }
+        $values = $this->nodes[$node];
+        if ( ! isset($values['parent'])) {
+            throw new \InvalidArgumentException("This node has no parent.");
+        }
+        return $values['parent'];
     }
 }
 

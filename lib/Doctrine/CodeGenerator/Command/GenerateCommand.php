@@ -18,12 +18,14 @@
  */
 
 namespace Doctrine\CodeGenerator\Command;
+
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 
 class GenerateCommand extends Command
 {
@@ -61,7 +63,9 @@ EOF
         $sourceClass = $config['generator']['source']['class'];
         if ($sourceClass == 'Doctrine\CodeGenerator\Source\ORMSource') {
             $em = $this->getHelper('em')->getEntityManager();
-            $source = new \Doctrine\CodeGenerator\Source\ORMSource($em);
+            $metadata = new DisconnectedClassMetadataFactory();
+            $metadata->setEntityManager($em);
+            $source = new \Doctrine\CodeGenerator\Source\ORMSource($metadata);
         } else {
             $source = new $sourceClass($config['generator']['source']['arguments']);
         }
@@ -72,20 +76,23 @@ EOF
         $source->setMetadataContainer($container);
 
         $evm = new \Doctrine\Common\EventManager;
+        $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor($container);
+        $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm);
+        $visitors = array($parent, $eventvisitor);
+
+        $project = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
+
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if (!is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
                 throw new \RuntimeException("Listener $listener has to extend AbstractCodeListener");
             }
             $listener = new $listener($args);
             $listener->setCodeBuilder($code);
+            $listener->setProject($project);
             $listener->setMetadataContainer($container);
             $evm->addEventSubscriber($listener);
         }
-        $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
-        $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm, $parent);
-        $visitors = array($parent, $eventvisitor);
 
-        $project = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
         $source->generate($project);
 
         $lc = 0;

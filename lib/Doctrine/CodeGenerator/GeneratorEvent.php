@@ -36,12 +36,12 @@ class GeneratorEvent extends EventArgs
     const onGenerateParameter = 'onGenerateParameter';
 
     private $node;
-    private $parentStorage;
+    private $project;
 
-    public function __construct(PHPParser_Node $node, $parentStorage)
+    public function __construct(PHPParser_Node $node, $project = null)
     {
         $this->node = $node;
-        $this->parentStorage = $parentStorage;
+        $this->project = $project;
     }
 
     public function getNode()
@@ -49,9 +49,9 @@ class GeneratorEvent extends EventArgs
         return $this->node;
     }
 
-    public function getParent($node)
+    public function getProject()
     {
-        return $this->parentStorage->getParent($node);
+        return $this->project;
     }
 }
 

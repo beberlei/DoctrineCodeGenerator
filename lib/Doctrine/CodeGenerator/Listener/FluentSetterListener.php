@@ -24,7 +24,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\CodeGenerator\Builder\MethodBuilder;
 
 /**
- * Each property is turned to protected and getters/setters are added.
+ * Add Fluent $this return to every generated setter.
  */
 class FluentSetterListener extends AbstractCodeListener
 {
