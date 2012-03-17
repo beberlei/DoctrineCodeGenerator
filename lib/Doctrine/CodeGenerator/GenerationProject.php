@@ -21,6 +21,8 @@ namespace Doctrine\CodeGenerator;
 
 use PHPParser_Parser;
 use PHPParser_NodeTraverser;
+use PHPParser_PrettyPrinterAbstract;
+use PHPParser_PrettyPrinter_Zend;
 
 class GenerationProject
 {
@@ -28,8 +30,9 @@ class GenerationProject
     private $parser;
     private $traverser;
     private $files = array();
+    private $printer;
 
-    public function __construct($root, array $visitors = array(), PHPParser_Parser $parser = null)
+    public function __construct($root, array $visitors = array(), PHPParser_Parser $parser = null, PHPParser_PrettyPrinterAbstract $printer = null)
     {
         $this->root = $root;
         $this->traverser = new PHPParser_NodeTraverser();
@@ -37,6 +40,7 @@ class GenerationProject
         foreach ($visitors as $visitor) {
             $this->traverser->addVisitor($visitor);
         }
+        $this->printer = $printer ?: new PHPParser_PrettyPrinter_Zend();
     }
 
     public function getEmptyClass($className)
@@ -78,14 +82,13 @@ class GenerationProject
 
     public function write()
     {
-        $prettyPrinter = new \PHPParser_PrettyPrinter_Zend; // TODO: Configurable
         foreach ($this->files as $file) {
             $path = $this->root . "/" . $file->getPath();
             $dir = dirname($path);
             if (!file_exists($dir)) {
                 mkdir($dir, 0777, true);
             }
-            $code = "<?php\n" . $file->prettyPrint($prettyPrinter);
+            $code = "<?php\n" . $file->prettyPrint($this->printer);
             file_put_contents($path, $code);
         }
     }

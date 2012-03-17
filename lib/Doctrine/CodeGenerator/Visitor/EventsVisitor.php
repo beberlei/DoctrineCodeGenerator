@@ -44,14 +44,12 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         'PHPParser_Node_Stmt_Interface' => 'onGenerateInterface',
         'PHPParser_Node_Param' => 'onGenerateParameter',
     );
-    private $parentStorage;
     private $counter;
 
-    public function __construct(EventManager $evm, $parentStorage = null)
+    public function __construct(EventManager $evm)
     {
         $this->visited = new SplObjectStorage();
         $this->evm = $evm;
-        $this->parentStorage = $parentStorage;
     }
 
     public function beforeTraverse(array $nodes)
@@ -75,17 +73,22 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
             return;
         }
 
-        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node));
         $this->visited->attach($node);
         $this->counter++;
     }
 
     public function leaveNode(PHPParser_Node $node)
     {
+        if ($this->visited->contains($node)) {
+            return;
+        }
+
         $event = $this->getEvent($node);
         if (!$event) {
             return;
         }
+
         $event = "post" . substr($event, 2);
 
         $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
