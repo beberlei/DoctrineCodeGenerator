@@ -33,13 +33,17 @@ class EventsVisitorTest extends \PHPUnit_Framework_TestCase
 
     public function testNeverTriggerSameNodeTwice()
     {
-        $this->evm->expects($this->once())->method('dispatchEvent')
+        $this->evm->expects($this->at(0))->method('dispatchEvent')
                   ->with($this->equalTo('onGenerateClass'));
+        $this->evm->expects($this->at(1))->method('dispatchEvent')
+                  ->with($this->equalTo('postGenerateClass'));
 
         $node = new \PHPParser_Node_Stmt_Class('stdClass');
 
         $this->visitor->enterNode($node);
+        $this->visitor->leaveNode($node);
         $this->visitor->enterNode($node);
+        $this->visitor->leaveNode($node);
     }
 
     /**

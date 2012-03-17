@@ -73,17 +73,14 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
             return;
         }
 
-        $this->evm->dispatchEvent($event, new GeneratorEvent($node));
         $this->visited->attach($node);
         $this->counter++;
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node));
+        $this->visited->detach($node);
     }
 
     public function leaveNode(PHPParser_Node $node)
     {
-        if ($this->visited->contains($node)) {
-            return;
-        }
-
         $event = $this->getEvent($node);
         if (!$event) {
             return;
@@ -91,7 +88,8 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
 
         $event = "post" . substr($event, 2);
 
-        $this->evm->dispatchEvent($event, new GeneratorEvent($node, $this->parentStorage));
+        $this->visited->attach($node);
+        $this->evm->dispatchEvent($event, new GeneratorEvent($node));
     }
 
     private function getEvent($node)
