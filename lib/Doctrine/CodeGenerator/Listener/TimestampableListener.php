@@ -20,8 +20,7 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\CodeGenerator\Builder\ClassBuilder;
-use Doctrine\CodeGenerator\Builder\StmtBuilder;
+use Doctrine\CodeGenerator\Builder\Manipulator;
 
 class TimestampableListener extends AbstractCodeListener
 {
@@ -34,24 +33,31 @@ class TimestampableListener extends AbstractCodeListener
 
     public function onGenerateClass(GeneratorEvent $event)
     {
+        $code  = $this->code;
         $class = $event->getNode();
-        if ( !in_array($class->name, $this->classes)) {
+
+        if ( ! in_array($class->name, $this->classes)) {
             return;
         }
 
-        $code = $this->code;
-        $builder = new ClassBuilder($class);
-        $builder->appendProperty('updated')
-                ->appendProperty('created')
-                ->findMethod('__construct')
-                    ->append(
-                        $code->assignment(
-                            $code->instanceVariable('created'),
-                            $code->instantiate('DateTime')
-                        )
-                    )
-                ->end()
-                ->append($code->classCode(<<<ETS
+        $this->makeTimestampable($class, $code);
+    }
+
+    public function makeTimestampable($class, $code)
+    {
+        $manipulator = new Manipulator();
+        $constructor = $manipulator->findMethod($class, '__construct');
+
+        $manipulator->addProperty($class, $code->property('updated')->makeProtected());
+        $manipulator->addProperty($class, $code->property('created')->makeProtected());
+
+        $manipulator->append(
+                $constructor,
+            $code->assignment(
+                $code->instanceVariable('created'),
+                $code->instantiate('DateTime')
+            )
+        )->append($class, $code->classCode(<<<ETS
 public function getCreated()
 {
     return \$this->created;
@@ -67,8 +73,8 @@ public function getUpdated()
     return \$this->updated;
 }
 ETS
-                ))
-            ;
+            )
+        );
     }
 }
 

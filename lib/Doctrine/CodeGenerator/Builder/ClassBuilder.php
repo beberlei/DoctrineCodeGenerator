@@ -13,7 +13,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the LGPL. For more information, see
+ * and is licensed under the MIT license. For more information, see
  * <http://www.doctrine-project.org>.
  */
 
@@ -21,64 +21,52 @@ namespace Doctrine\CodeGenerator\Builder;
 
 use PHPParser_Node_Stmt_Class;
 use PHPParser_Node_Stmt_ClassMethod;
+use PHPParser_Builder_Class;
 
-class ClassBuilder
+/**
+ * Class Builder
+ */
+class ClassBuilder extends PHPParser_Builder_Class
 {
-    private $class;
-
-    static public function newClass($name)
-    {
-        return new self(new PHPParser_Node_Stmt_Class($name));
-    }
-
-    public function __construct(PHPParser_Node_Stmt_Class $class)
-    {
-        $this->class = $class;
-    }
-
-    public function getNode()
-    {
-        return $this->class;
-    }
-
     /**
      * @return \Doctrine\CodeGenerator\Builder\MethodBuilder
      */
-    public function appendMethod($name)
+    public function method($name)
     {
-        $method = new PHPParser_Node_Stmt_ClassMethod($name);
-        $methodBuilder = new MethodBuilder($method, $this);
-        $this->class->stmts[] = $method;
-        return $methodBuilder;
+        return new MethodBuilder($name);
     }
 
     public function findMethod($name)
     {
-        foreach ($this->class->stmts as $stmt) {
+        foreach ($this->methods as $stmt) {
             if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
                   $stmt instanceof \PHPParser_Node_Stmt_Function) &&
-                strtolower($stmt->name) === strtolower($name)) {
+                 strtolower($stmt->name) === strtolower($name)) {
+
                 return new MethodBuilder($stmt, $this);
             }
         }
-        return $this->appendMethod($name);
+        return $this->method($name);
     }
 
+    /**
+     * Does the class have the given method?
+     *
+     * @param string $name
+     * @return bool
+     */
     public function hasMethod($name)
     {
-        foreach ($this->class->stmts as $stmt) {
-            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
-                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
-                strtolower($stmt->name) === strtolower($name)) {
-                return true;
-            }
-        }
-        return false;
+        return $this->getMethod($name) !== null;
     }
 
+    /**
+     * @param string $name
+     * @return PHPParser_Node_Stmt_ClassMethod
+     */
     public function getMethod($name)
     {
-        foreach ($this->class->stmts as $stmt) {
+        foreach ($this->methods as $stmt) {
             if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
                   $stmt instanceof \PHPParser_Node_Stmt_Function) &&
                 strtolower($stmt->name) === strtolower($name)) {
@@ -98,12 +86,23 @@ class ClassBuilder
      * @param int $modifiers
      * @return \Doctrine\CodeGenerator\Builder\ClassBuilder
      */
-    public function appendProperty($name, $modifiers = PHPParser_Node_Stmt_Class::MODIFIER_PUBLIC)
+    public function property($name, $modifiers = PHPParser_Node_Stmt_Class::MODIFIER_PUBLIC)
     {
         $pp = new \PHPParser_Node_Stmt_PropertyProperty($name);
         $property = new \PHPParser_Node_Stmt_Property($modifiers, array($pp));
-        $this->class->stmts[] = $property;
+        $this->properties[] = $property;
         return $this;
+    }
+
+    /**
+     * Does the class has the property?
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasProperty($name)
+    {
+        return $this->getProperty($name) !== null;
     }
 
     /**
@@ -112,27 +111,18 @@ class ClassBuilder
      */
     public function getProperty($name)
     {
-        foreach ($this->class->stmts as $stmt) {
-            if ($stmt instanceof \PHPParser_Node_Stmt_Property) {
-                foreach ($stmt->props as $property) {
-                    if ($property->name === $name) {
-                        return $property;
-                    }
+        foreach ($this->properties as $stmt) {
+            if ( ! ($stmt instanceof \PHPParser_Node_Stmt_Property)) {
+                continue;
+            }
+
+            foreach ($stmt->props as $property) {
+                if ($property->name === $name) {
+                    return $property;
                 }
             }
         }
         return null;
-    }
-
-    /**
-     * @return ClassBuilder
-     */
-    public function append($stmt)
-    {
-        foreach ((array)$stmt as $s) {
-            $this->class->stmts[] = $s;
-        }
-        return $this;
     }
 }
 

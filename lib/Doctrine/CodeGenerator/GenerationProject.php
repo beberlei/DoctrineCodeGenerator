@@ -20,6 +20,7 @@
 namespace Doctrine\CodeGenerator;
 
 use PHPParser_Parser;
+use PHPParser_Lexer;
 use PHPParser_NodeTraverser;
 use PHPParser_PrettyPrinterAbstract;
 use PHPParser_PrettyPrinter_Zend;
@@ -36,7 +37,7 @@ class GenerationProject
     {
         $this->root = $root;
         $this->traverser = new PHPParser_NodeTraverser();
-        $this->parser = new Parser($this->traverser, $parser ?: new PHPParser_Parser());
+        $this->parser = new Parser($this->traverser, $parser ?: new PHPParser_Parser(new PHPParser_Lexer));
         foreach ($visitors as $visitor) {
             $this->traverser->addVisitor($visitor);
         }

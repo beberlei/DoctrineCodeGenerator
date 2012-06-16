@@ -6,8 +6,11 @@
         "symfony/yaml": "*",
         "doctrine/common": "*"
     },
-    "recommend": {
-        "doctrine/orm": "2.2.0"
+    "require-dev": {
+        "doctrine/orm": "*"
+    },
+    "suggest": {
+        "doctrine/orm": "Code-Generation for the ORM"
     },
     "autoload": {
         "psr-0": {

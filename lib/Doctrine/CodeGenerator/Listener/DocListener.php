@@ -19,6 +19,7 @@
 
 namespace Doctrine\CodeGenerator\Listener;
 
+use Doctrine\CodeGenerator\Builder\Manipulator;
 use Doctrine\CodeGenerator\GeneratorEvent;
 
 /**
@@ -28,11 +29,47 @@ class DocListener extends AbstractCodeListener
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
-        $node = $event->getNode();
-        $type = $this->metadata->getAttribute($node->props[0], 'type') ?: 'mixed';
-        $node->setDocComment(<<<EPM
+        $node        = $event->getNode();
+        $type        = $this->metadata->getAttribute($node->props[0], 'type') ?: 'mixed';
+        $manipulator = new Manipulator();
+
+        $manipulator->setDocComment($node, <<<EPM
 /**
  * @var $type
+ */
+EPM
+);
+    }
+
+    public function onGenerateGetter(GeneratorEvent $event)
+    {
+        $node         = $event->getNode();
+        $type         = $this->getMethodsPropertyType($node);
+        $propertyName = $this->getPropertyName($node);
+        $manipulator  = new Manipulator();
+
+        $manipulator->setDocComment($node, <<<EPM
+/**
+ * Return $propertyName
+ *
+ * @return $type
+ */
+EPM
+);
+    }
+
+    public function onGenerateSetter(GeneratorEvent $event)
+    {
+        $node         = $event->getNode();
+        $type         = $this->getMethodsPropertyType($node);
+        $propertyName = $this->getPropertyName($node);
+        $manipulator  = new Manipulator();
+
+        $manipulator->setDocComment($node, <<<EPM
+/**
+ * Set $propertyName
+ *
+ * @param $type \$$propertyName
  */
 EPM
 );
@@ -56,38 +93,6 @@ EPM
             return $property->name;
         }
         return lcfirst(substr($node->name, 3));
-    }
-
-    public function onGenerateGetter(GeneratorEvent $event)
-    {
-        $node = $event->getNode();
-        $type = $this->getMethodsPropertyType($node);
-        $propertyName = $this->getPropertyName($node);
-
-        $node->setDocComment(<<<EPM
-/**
- * Return $propertyName
- *
- * @return $type
- */
-EPM
-);
-    }
-
-    public function onGenerateSetter(GeneratorEvent $event)
-    {
-        $node = $event->getNode();
-        $type = $this->getMethodsPropertyType($node);
-        $propertyName = $this->getPropertyName($node);
-
-        $node->setDocComment(<<<EPM
-/**
- * Set $propertyName
- *
- * @param $type \$$propertyName
- */
-EPM
-);
     }
 }
 

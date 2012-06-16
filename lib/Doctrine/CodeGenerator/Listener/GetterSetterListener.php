@@ -21,6 +21,7 @@ namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\Builder\Manipulator;
 
 /**
  * Each property is turned to protected and getters/setters are added.
@@ -32,29 +33,32 @@ class GetterSetterListener extends AbstractCodeListener
         $node = $event->getNode();
         $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED;
 
-        $class = $this->metadata->getParent($node);
-        $builder = new ClassBuilder($class);
-        $code = $this->code;
+        $class       = $this->metadata->getParent($node);
+        $code        = $this->code;
+        $manipulator = new Manipulator;
 
         foreach ($node->props as $property) {
             $setName = 'set' . ucfirst($property->name);
             $getName = 'get' . ucfirst($property->name);
 
-            if ($builder->hasMethod($setName) || $builder->hasMethod($getName)) {
+            if ($manipulator->hasMethod($class, $setName) ||
+                $manipulator->hasMethod($class, $getName)) {
+
                 continue;
             }
 
-            $builder
-                ->appendMethod($setName)
-                    ->addParam($property->name)
-                    ->append($code->assignment($code->instanceVariable($property->name), $code->variable($property->name)))
-                ->end()
-                ->appendMethod($getName)
-                    ->append($code->returnStmt($code->instanceVariable($property->name)))
-                ->end();
+            $setter = $manipulator->findMethod($class, $setName);
+            $manipulator->param($setter, $property->name);
+            $manipulator->append($setter, $code->assignment($code->instanceVariable($property->name), $code->variable($property->name)));
+            $manipulator->append($class, $setter);
 
-            $this->metadata->setAttribute($builder->getMethod($setName), 'property', $property);
-            $this->metadata->setAttribute($builder->getMethod($getName), 'property', $property);
+            $getter = $manipulator->findMethod($class, $setName);
+            $manipulator->param($getter, $property->name);
+            $manipulator->append($getter, $code->returnStmt($code->instanceVariable($property->name)));
+            $manipulator->append($class, $getter);
+
+            $this->metadata->setAttribute($setter, 'property', $property);
+            $this->metadata->setAttribute($getter, 'property', $property);
         }
     }
 

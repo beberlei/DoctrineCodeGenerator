@@ -1,6 +1,6 @@
-# Code Generation
+# Doctrine Code Generator
 
-In general code-generation just moves the inability to correctly abstract code into a layer that simplifies the downsides of writing lots of code by hand. However there are use-cases for code-generation:
+In general code-generation just moves the inability to correctly abstract code into a layer that simplifies the downsides of writing lots of code by hand. However there are use-cases for code-generation, mostly in context with Object-Relational-Mappers:
 
 * Transforming existing models (XML, UML, CSV, whatever) from one to another representation.
 * Generating boiler-plate code that is impossible to abstract nicely (`__get`/`__set`/`__call` alternatives)
@@ -14,8 +14,9 @@ The problem of code-generators is that they leave you with thousands of lines of
 
 ## Idea
 
-Using [nikics PHP Parser](https://github.com/nikic/PHP_Parser) library we generate code using an AST. The code is generated from a set of input sources. Events are triggered when code blocks are generated:
+Using [nikics PHP Parser](https://github.com/nikic/PHP_Parser) library we generate code using an AST. The code is generated from a set of input sources, usually during the "onStartGeneration" event. Events are subsequently triggered when code blocks are generated:
 
+* StartGeneration
 * Class
 * Property
 * Method
@@ -24,47 +25,31 @@ Using [nikics PHP Parser](https://github.com/nikic/PHP_Parser) library we genera
     * Constructor
 * Function
 
-Event Handlers can register to each events and either:
+Event Handlers can register to all events and for example:
 
 * Manipulate the AST
 * Trigger more specialized events
 
 A configuration for the code-generator would look like:
 
-    @@@ yml
-
     generator:
-      input:
-        doctrine-mapping: from-database
+      destination: "code"
       events:
-        Doctrine\CodeGenerator\EventHandler\GetterSetterListener: ~
-        Doctrine\CodeGenerator\EventHandler\ReadOnlyEntityValueObjectListener: ~
-        Doctrine\CodeGenerator\EventHandler\BidirectionalAssociationListener: ~
-        Doctrine\CodeGenerator\EventHandler\DocBlockListener: ~
-        Doctrine\CodeGenerator\EventHandler\DoctrineAnnotations: ~
-        Doctrine\CodeGenerator\EventHandler\ImmutableObjects:
+        Doctrine\CodeGenerator\Listener\ORM\GenerateProjectListener: ~
+        Doctrine\CodeGenerator\Listener\GetterSetterListener: ~
+        Doctrine\CodeGenerator\Listener\ReadOnlyEntityValueObjectListener: ~
+        Doctrine\CodeGenerator\Listener\BidirectionalAssociationListener: ~
+        Doctrine\CodeGenerator\Listener\DocBlockListener: ~
+        Doctrine\CodeGenerator\Listener\DoctrineAnnotations: ~
+        Doctrine\CodeGenerator\Listener\ImmutableObjects:
           - "ImmutableClass1"
+        Doctrine\CodeGenerator\Listener\ORM\MappingGenerator:
+            type: xml
       output:
         codingStandard: Symfony
 
-PHP Parser does not provide a nice API to manipulate the AST (yet). Because this is a major operation we need to create an API (and contribute it back!) for this. A managable solution for developers would be a kind of DOM like approach with a jQuery-like API for manipulation. A selector language can filter for specific code elements and then manipulate them:
+## Generating Code
 
-    $builder = $project->createEmptyFileForClass('Test'); // Assume PSR-0
-    $builder->class('Test') // class Test
-            ->property('foo')->private()->docblock('My property') // /** My Property */ private $foo;
-            ->property('bar') // public $bar;
-            ->method('setFoo')->param('foo')->typehint('SplString')->default(null) // function setFoo(SplString $foo = null)
-            ->code(
-                $builder->assignment(
-                    $builder->instanceVariable('foo'), $builder->variable('foo') // $this->foo = $foo
-                )
-            )->append($builder->return($builder->instanceVariable('foo'))) // return $this->foo
-            ->method('
-
-    $tree->find('Class[name="ImmutableClass"] Property[name="set*"]')->remove();
-    $returnStmt = $tree->find("Return");
-    $returnStmt->before("$this->assertFoo();");
-
-As you can see in the last block there is also support for injecting strings into the AST. Using PHP Parser these bits are parsed into an AST aswell and put at the specific locations in the AST.
-
+This project provides a bunch of builder objects on top of the PHP Parser Builder API. The aim is to have a fluent and
+convenient API to generate code.
 
