@@ -112,6 +112,11 @@ class Manipulator extends PHPParser_BuilderAbstract
         return $stmt;
     }
 
+    /**
+     * Get a PropertyProperty from a class.
+     *
+     * @return PHPParser_Node_Stmt_PropertyProperty
+     */
     public function getProperty(PHPParser_Node_Stmt_Class $class, $propertyName)
     {
         foreach ($class->stmts as $stmt) {
@@ -123,19 +128,6 @@ class Manipulator extends PHPParser_BuilderAbstract
         }
 
         return null;
-    }
-
-    public function findProperty(PHPParser_Node_Stmt_Class $class, $propertyName)
-    {
-        $stmt = $this->getProperty($class, $propertyName);
-
-        if ($stmt) {
-            return $stmt;
-        }
-
-        // not efficient, but it works as intended
-        $this->addProperty($class, $propertyName);
-        return $this->findProperty($class, $propertyName);
     }
 
     /**
@@ -179,7 +171,7 @@ class Manipulator extends PHPParser_BuilderAbstract
         throw new \BadMethodCallException("Not valid on this builder!");
     }
 
-    public function param(PHPParser_Node_Stmt_ClassMethod $method, $name, $default = null, $type = null, $byRef = false)
+    public function param(PHPParser_Node_Stmt_ClassMethod $method, $name, $type = null, $default = null, $byRef = false)
     {
         $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
         $method->params[] = $param;

@@ -83,7 +83,7 @@ EPM
         if ($property) {
             $type = $property->getAttribute('type');
         } else if (preg_match('(^(set|get)(.*+)$)', $method->name, $match)) {
-            $class       = $this->metadata->getParent($method);
+            $class       = $method->getAttribute('parent');
             $manipulator = new Manipulator();
             $property    = $manipulator->getProperty($class, lcfirst($match[2]));
 

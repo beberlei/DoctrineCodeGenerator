@@ -30,10 +30,10 @@ class GetterSetterListener extends AbstractCodeListener
 {
     public function onGenerateProperty(GeneratorEvent $event)
     {
-        $node = $event->getNode();
+        $node       = $event->getNode();
         $node->type = \PHPParser_Node_Stmt_Class::MODIFIER_PROTECTED;
 
-        $class       = $this->metadata->getParent($node);
+        $class       = $node->getAttribute('parent');
         $code        = $this->code;
         $manipulator = new Manipulator;
 
@@ -48,10 +48,10 @@ class GetterSetterListener extends AbstractCodeListener
             }
 
             $setter = $manipulator->findMethod($class, $setName);
+            $getter = $manipulator->findMethod($class, $getName);
+
             $manipulator->param($setter, $property->name);
             $manipulator->append($setter, $code->assignment($code->instanceVariable($property->name), $code->variable($property->name)));
-
-            $getter = $manipulator->findMethod($class, $getName);
             $manipulator->append($getter, $code->returnStmt($code->instanceVariable($property->name)));
 
             $setter->setAttribute('property', $property);

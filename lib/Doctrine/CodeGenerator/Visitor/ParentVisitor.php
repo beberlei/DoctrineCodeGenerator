@@ -41,20 +41,9 @@ class ParentVisitor extends PHPParser_NodeVisitorAbstract
 
     public function enterNode(PHPParser_Node $node)
     {
-        if ($node instanceof \PHPParser_Node_Stmt_Class) {
-            $this->class = $node;
-        } else if ($node instanceof \PHPParser_Node_Stmt_ClassMethod) {
-            $this->container->setClassFor($node, $this->class);
-        } else if ($node instanceof \PHPParser_Node_Stmt_PropertyProperty) {
-            $this->container->setClassFor($node, $this->class);
-        } else if ($node instanceof \PHPParser_Node_Stmt_Property) {
-            $this->container->setClassFor($node, $this->class);
-        } else if ($node instanceof \PHPParser_Node_Stmt_ClassConst) {
-            $this->container->setClassFor($node, $this->class);
-        }
         $parent = end($this->parents);
         if ($parent) {
-            $this->container->setParent($node, $parent);
+            $node->setAttribute('parent', $parent);
         }
         $this->parents[] = $node;
     }

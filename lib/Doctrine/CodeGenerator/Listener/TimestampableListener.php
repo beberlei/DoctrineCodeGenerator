@@ -22,6 +22,11 @@ namespace Doctrine\CodeGenerator\Listener;
 use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\CodeGenerator\Builder\Manipulator;
 
+/**
+ * Turns classes into timestampable classes.
+ *
+ * @author Benjamin Eberlei <kontakt@beberlei.de>
+ */
 class TimestampableListener extends AbstractCodeListener
 {
     private $classes;
@@ -57,13 +62,17 @@ class TimestampableListener extends AbstractCodeListener
         $manipulator->addProperty($class, $createdProperty);
         $manipulator->addProperty($class, $updatedProperty);
 
-        $manipulator->append(
-                $constructor,
-            $code->assignment(
-                $code->instanceVariable('created'),
-                $code->instantiate('DateTime')
+        $manipulator
+            ->append($constructor,
+                $code->assignment(
+                    $code->instanceVariable('created'),
+                    $code->assignment(
+                        $code->instanceVariable('updated'),
+                        $code->instantiate('DateTime')
+                    )
+                )
             )
-        )->append($class, $code->classCode(<<<ETS
+            ->append($class, $code->classCode(<<<ETS
 public function getCreated()
 {
     return \$this->created;
@@ -79,8 +88,8 @@ public function getUpdated()
     return \$this->updated;
 }
 ETS
-            )
-        );
+            ))
+        ;
     }
 }
 
