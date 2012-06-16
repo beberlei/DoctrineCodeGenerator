@@ -52,8 +52,7 @@ class GetterSetterListener extends AbstractCodeListener
             $manipulator->append($setter, $code->assignment($code->instanceVariable($property->name), $code->variable($property->name)));
             $manipulator->append($class, $setter);
 
-            $getter = $manipulator->findMethod($class, $setName);
-            $manipulator->param($getter, $property->name);
+            $getter = $manipulator->findMethod($class, $getName);
             $manipulator->append($getter, $code->returnStmt($code->instanceVariable($property->name)));
             $manipulator->append($class, $getter);
 

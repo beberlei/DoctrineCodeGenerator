@@ -170,12 +170,13 @@ class Manipulator extends PHPParser_BuilderAbstract
     public function setDocComment(\PHPParser_Node $node, $comment)
     {
         $doc      = $node->getDocComment();
-        $comments = $node->getAttributes('comments');
+        $comments = $node->getAttribute('comments');
         if ($doc) {
             unset($comments[ count($comments) - 1]);
         }
 
         $comments[] = new \PHPParser_Comment_Doc($comment);
+        $node->setAttribute('comments', $comments);
     }
 }
 
