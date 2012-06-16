@@ -26,16 +26,10 @@ use Doctrine\CodeGenerator\MetadataContainer;
 abstract class Source
 {
     protected $code;
-    protected $metadata;
 
     public function setCodeBuilder(CodeBuilder $builder)
     {
         $this->code = $builder;
-    }
-
-    public function setMetadataContainer(MetadataContainer $container)
-    {
-        $this->metadata = $container;
     }
 
     abstract public function generate(GenerationProject $project);

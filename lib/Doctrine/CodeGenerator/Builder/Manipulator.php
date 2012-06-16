@@ -112,6 +112,32 @@ class Manipulator extends PHPParser_BuilderAbstract
         return $stmt;
     }
 
+    public function getProperty(PHPParser_Node_Stmt_Class $class, $propertyName)
+    {
+        foreach ($class->stmts as $stmt) {
+            if ( $stmt instanceof \PHPParser_Node_Stmt_Property &&
+                 $stmt->props[0]->name === $propertyName) {
+
+                return $stmt->props[0];
+            }
+        }
+
+        return null;
+    }
+
+    public function findProperty(PHPParser_Node_Stmt_Class $class, $propertyName)
+    {
+        $stmt = $this->getProperty($class, $propertyName);
+
+        if ($stmt) {
+            return $stmt;
+        }
+
+        // not efficient, but it works as intended
+        $this->addProperty($class, $propertyName);
+        return $this->findProperty($class, $propertyName);
+    }
+
     /**
      * Check if class has a method with given name.
      *

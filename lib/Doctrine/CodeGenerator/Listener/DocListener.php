@@ -30,7 +30,7 @@ class DocListener extends AbstractCodeListener
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node        = $event->getNode();
-        $type        = $this->metadata->getAttribute($node->props[0], 'type') ?: 'mixed';
+        $type        = $node->props[0]->getAttribute('type') ?: 'mixed';
         $manipulator = new Manipulator();
 
         $manipulator->setDocComment($node, <<<EPM
@@ -75,20 +75,29 @@ EPM
 );
     }
 
-    private function getMethodsPropertyType($node)
+    private function getMethodsPropertyType($method)
     {
-        $property = $this->metadata->getAttribute($node, 'property');
+        $property = $method->getAttribute('property');
+        $type     = null;
+
         if ($property) {
-            $type = $this->metadata->getAttribute($property, 'type');
-        } else {
-            $type = 'mixed';
+            $type = $property->getAttribute('type');
+        } else if (preg_match('(^(set|get)(.*+)$)', $method->name, $match)) {
+            $class       = $this->metadata->getParent($method);
+            $manipulator = new Manipulator();
+            $property    = $manipulator->getProperty($class, lcfirst($match[2]));
+
+            if ($property) {
+                $type = $property->getAttribute('type');
+            }
         }
-        return $type;
+
+        return $type ?: 'mixed';
     }
 
     private function getPropertyName($node)
     {
-        $property = $this->metadata->getAttribute($node, 'property');
+        $property = $node->getAttribute('property');
         if ($property) {
             return $property->name;
         }

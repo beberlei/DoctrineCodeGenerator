@@ -49,18 +49,18 @@ class GenerateProjectListener extends AbstractCodeListener
                 $builder->appendProperty($fieldName);
                 $property = $builder->getProperty($fieldName);
 
-                $this->metadata->addTag($property, 'column');
-                $this->metadata->setAttribute($property, 'type', $fieldMapping['type']);
-                $this->metadata->setAttribute($property, 'mapping', $fieldMapping);
+                $property->setAttribute('isColumn', true);
+                $property->setAttribute('type', $fieldMapping['type']);
+                $property->setAttribute('mapping', $fieldMapping);
             }
 
             foreach ($metadata->associationMappings as $assocName => $assoc) {
                 $builder->appendProperty($assocName);
                 $property = $builder->getProperty($assocName);
 
-                $this->metadata->addTag($property, 'association');
-                $this->metadata->setAttribute($property, 'type', $assoc['targetEntity']);
-                $this->metadata->setAttribute($property, 'mapping', $assoc);
+                $property->setAttribute('isAssociation', true);
+                $property->setAttribute('type', $assoc['targetEntity']);
+                $property->setAttribute('mapping', $assoc);
             }
 
             $file = $project->getEmptyClass($metadata->name);

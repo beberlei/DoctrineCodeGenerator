@@ -48,8 +48,14 @@ class TimestampableListener extends AbstractCodeListener
         $manipulator = new Manipulator();
         $constructor = $manipulator->findMethod($class, '__construct');
 
-        $manipulator->addProperty($class, $code->property('updated')->makeProtected());
-        $manipulator->addProperty($class, $code->property('created')->makeProtected());
+        $updatedProperty = $code->property('updated')->makeProtected()->getNode();
+        $createdProperty = $code->property('created')->makeProtected()->getNode();
+
+        $updatedProperty->props[0]->setAttribute('type', 'DateTime');
+        $createdProperty->props[0]->setAttribute('type', 'DateTime');
+
+        $manipulator->addProperty($class, $createdProperty);
+        $manipulator->addProperty($class, $updatedProperty);
 
         $manipulator->append(
                 $constructor,
