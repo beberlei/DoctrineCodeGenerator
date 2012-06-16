@@ -20,6 +20,7 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\EventManager;
 use Doctrine\CodeGenerator\Builder\CodeBuilder;
 use Doctrine\CodeGenerator\MetadataContainer;
 use Doctrine\CodeGenerator\GenerationProject;
@@ -27,17 +28,17 @@ use Doctrine\CodeGenerator\GenerationProject;
 abstract class AbstractCodeListener implements EventSubscriber
 {
     protected $code;
-    protected $metadata;
     protected $project;
+    protected $eventManager;
+
+    public function setEventManager(EventManager $eventManager)
+    {
+        $this->eventManager = $eventManager;
+    }
 
     public function setCodeBuilder(CodeBuilder $builder)
     {
         $this->code = $builder;
-    }
-
-    public function setMetadataContainer(MetadataContainer $container)
-    {
-        $this->metadata = $container;
     }
 
     public function setProject(GenerationProject $project)

@@ -22,10 +22,12 @@ namespace Doctrine\CodeGenerator\Listener\ORM;
 use Doctrine\CodeGenerator\GenerationProject;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
 use Doctrine\CodeGenerator\Listener\AbstractCodeListener;
+use Doctrine\CodeGenerator\ProjectEvent;
+
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
-use Doctrine\CodeGenerator\ProjectEvent;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Generate ORM Classes from Database or Schema data
@@ -33,6 +35,24 @@ use Doctrine\CodeGenerator\ProjectEvent;
 class GenerateProjectListener extends AbstractCodeListener
 {
     private $metadataFactory;
+
+    private $typeAlias = array(
+        Type::DATETIMETZ    => '\DateTime',
+        Type::DATETIME      => '\DateTime',
+        Type::DATE          => '\DateTime',
+        Type::TIME          => '\DateTime',
+        Type::OBJECT        => '\stdClass',
+        Type::BIGINT        => 'integer',
+        Type::SMALLINT      => 'integer',
+        Type::TEXT          => 'string',
+        Type::BLOB          => 'resource',
+        Type::DECIMAL       => 'float',
+    );
+
+    public function __construct(array $typeAlias = null)
+    {
+        $this->typeAlias = array_merge($this->typeAlias, $typeAlias ?: array());
+    }
 
     public function injectMetadataFactory($metadata)
     {
@@ -66,7 +86,7 @@ class GenerateProjectListener extends AbstractCodeListener
             $property = $builder->getProperty($fieldName);
 
             $property->setAttribute('isColumn', true);
-            $property->setAttribute('type', $fieldMapping['type']);
+            $property->setAttribute('type', isset($this->typeAlias[$fieldMapping['type']]) ? $this->typeAlias[$fieldMapping['type']] : $fieldMapping['type']);
             $property->setAttribute('mapping', $fieldMapping);
         }
 

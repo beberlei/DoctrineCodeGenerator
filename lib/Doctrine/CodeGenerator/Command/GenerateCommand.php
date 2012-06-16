@@ -48,36 +48,35 @@ EOF
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = realpath($input->getArgument('configfile'));
+        $path   = realpath($input->getArgument('configfile'));
         $config = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($path));
 
-        if (!isset($config['generator'])) {
+        if ( ! isset($config['generator'])) {
             throw new \RuntimeException;
         }
 
         $destination = realpath(dirname($path)) . "/". $config['generator']['destination'];
-        if (!file_exists($destination)) {
+        if ( ! file_exists($destination)) {
             mkdir($destination, 0777, true);
         }
 
-        $code = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
-        $container = new \Doctrine\CodeGenerator\MetadataContainer;
-
-        $evm = new \Doctrine\Common\EventManager;
-        $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor($container);
+        $evm          = new \Doctrine\Common\EventManager;
+        $code         = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
+        $parent       = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
         $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm);
-        $visitors = array($parent, $eventvisitor);
-
-        $project = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
+        $visitors     = array($parent, $eventvisitor);
+        $project      = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
 
         foreach ($config['generator']['listeners'] as $listener => $args) {
-            if (!is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
+            if ( ! is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
                 throw new \RuntimeException("Listener $listener has to extend AbstractCodeListener");
             }
+
             $listener = new $listener($args);
             $listener->setCodeBuilder($code);
             $listener->setProject($project);
-            $listener->setMetadataContainer($container);
+            $listener->setEventManager($evm);
+
             $evm->addEventSubscriber($listener);
 
             if (method_exists($listener, 'injectMetadataFactory')) {

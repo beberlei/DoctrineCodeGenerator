@@ -138,8 +138,6 @@ class CodeBuilder
         if ($doc) {
             unset($comments[ count($comments) - 1]);
         }
-
-
     }
 }
 

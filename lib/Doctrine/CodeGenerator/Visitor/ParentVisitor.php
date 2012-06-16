@@ -30,14 +30,10 @@ use PHPParser_Node;
  */
 class ParentVisitor extends PHPParser_NodeVisitorAbstract
 {
-    private $class;
+    /**
+     * @var array
+     */
     private $parents = array();
-    private $container;
-
-    public function __construct($container)
-    {
-        $this->container = $container;
-    }
 
     public function enterNode(PHPParser_Node $node)
     {

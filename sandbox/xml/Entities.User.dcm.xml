@@ -9,9 +9,11 @@ http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
             <generator strategy="AUTO"/>
         </id>
         <field name="name" type="string" length="50"/>
-        <one-to-one field="address" target-entity="Address">
+        <many-to-one field="address" target-entity="Address">
             <join-column name="address_id" referenced-column-name="id"/>
-        </one-to-one>
+        </many-to-one>
+
+        <one-to-many field="addressHistory" target-entity="Address" mapped-by="user" />
     </entity>
 
 </doctrine-mapping>
