@@ -1,16 +1,14 @@
 generator:
   destination: code
   listeners:
+    Doctrine\CodeGenerator\Listener\GenerateClassesListener:
+        classes:
+            TestClass:
+              properties:
+                foo: ~
+                bar: ~
     Doctrine\CodeGenerator\Listener\TimestampableListener:
       - "TestClass"
     Doctrine\CodeGenerator\Listener\GetterSetterListener: ~
     Doctrine\CodeGenerator\Listener\DocListener: ~
     Doctrine\CodeGenerator\Listener\FluentSetterListener: ~
-  source:
-    class: Doctrine\CodeGenerator\Source\ConfigSource
-    arguments:
-      classes:
-        TestClass:
-          properties:
-            foo: ~
-            bar: ~

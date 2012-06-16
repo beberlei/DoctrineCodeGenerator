@@ -17,24 +17,31 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator\Source;
+namespace Doctrine\CodeGenerator\Listener\ORM;
 
 use Doctrine\CodeGenerator\GenerationProject;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\Listener\AbstractCodeListener;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
+use Doctrine\CodeGenerator\ProjectEvent;
 
-class ORMSource extends Source
+/**
+ * Generate ORM Classes from Database or Schema data
+ */
+class GenerateProjectListener extends AbstractCodeListener
 {
     private $metadataFactory;
 
-    public function __construct($metadata)
+    public function injectMetadataFactory($metadata)
     {
         $this->metadataFactory = $metadata;
     }
 
-    public function generate(GenerationProject $project)
+    public function onStartGeneration(ProjectEvent $event)
     {
+        $project = $event->getProject();
+
         foreach ($this->metadataFactory->getAllMetadata() as $metadata) {
             $builder = ClassBuilder::newClass($metadata->name);
 

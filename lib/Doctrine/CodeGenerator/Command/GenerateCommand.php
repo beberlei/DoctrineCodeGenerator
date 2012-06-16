@@ -26,6 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
+use Doctrine\CodeGenerator\ProjectEvent;
 
 class GenerateCommand extends Command
 {
@@ -59,21 +60,8 @@ EOF
             mkdir($destination, 0777, true);
         }
 
-        // TODO: Factory
-        $sourceClass = $config['generator']['source']['class'];
-        if ($sourceClass == 'Doctrine\CodeGenerator\Source\ORMSource') {
-            $em = $this->getHelper('em')->getEntityManager();
-            $metadata = new DisconnectedClassMetadataFactory();
-            $metadata->setEntityManager($em);
-            $source = new \Doctrine\CodeGenerator\Source\ORMSource($metadata);
-        } else {
-            $source = new $sourceClass($config['generator']['source']['arguments']);
-        }
-
         $code = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
         $container = new \Doctrine\CodeGenerator\MetadataContainer;
-        $source->setCodeBuilder($code);
-        $source->setMetadataContainer($container);
 
         $evm = new \Doctrine\Common\EventManager;
         $parent = new \Doctrine\CodeGenerator\Visitor\ParentVisitor($container);
@@ -91,9 +79,17 @@ EOF
             $listener->setProject($project);
             $listener->setMetadataContainer($container);
             $evm->addEventSubscriber($listener);
+
+            if (method_exists($listener, 'injectMetadataFactory')) {
+                // HACK!
+                $em = $this->getHelper('em')->getEntityManager();
+                $metadata = new DisconnectedClassMetadataFactory();
+                $metadata->setEntityManager($em);
+                $listener->injectMetadataFactory($metadata);
+            }
         }
 
-        $source->generate($project);
+        $evm->dispatchEvent(ProjectEvent::onStartGeneration, new ProjectEvent($project));
 
         $lc = 0;
         do {

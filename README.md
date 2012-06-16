@@ -14,7 +14,7 @@ The problem of code-generators is that they leave you with thousands of lines of
 
 ## Idea
 
-Using nikics PHP Parser library we generate code using an AST. The code is generated from a set of input sources. Events are triggered when code blocks are generated:
+Using [nikics PHP Parser](https://github.com/nikic/PHP_Parser) library we generate code using an AST. The code is generated from a set of input sources. Events are triggered when code blocks are generated:
 
 * Class
 * Property
@@ -47,7 +47,19 @@ A configuration for the code-generator would look like:
       output:
         codingStandard: Symfony
 
-PHP Parser does not provide a nice API to manipulate the AST. Because this is a major operation we need to create an API (and contribute it back!) for this. A managable solution for developers would be a kind of DOM like approach with a jQuery-like API for manipulation. A selector language can filter for specific code elements and then manipulate them:
+PHP Parser does not provide a nice API to manipulate the AST (yet). Because this is a major operation we need to create an API (and contribute it back!) for this. A managable solution for developers would be a kind of DOM like approach with a jQuery-like API for manipulation. A selector language can filter for specific code elements and then manipulate them:
+
+    $builder = $project->createEmptyFileForClass('Test'); // Assume PSR-0
+    $builder->class('Test') // class Test
+            ->property('foo')->private()->docblock('My property') // /** My Property */ private $foo;
+            ->property('bar') // public $bar;
+            ->method('setFoo')->param('foo')->typehint('SplString')->default(null) // function setFoo(SplString $foo = null)
+            ->code(
+                $builder->assignment(
+                    $builder->instanceVariable('foo'), $builder->variable('foo') // $this->foo = $foo
+                )
+            )->append($builder->return($builder->instanceVariable('foo'))) // return $this->foo
+            ->method('
 
     $tree->find('Class[name="ImmutableClass"] Property[name="set*"]')->remove();
     $returnStmt = $tree->find("Return");

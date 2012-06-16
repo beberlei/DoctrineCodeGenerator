@@ -17,44 +17,37 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator;
+namespace Doctrine\CodeGenerator\Listener;
 
-use PHPParser_Node;
-use Doctrine\Common\EventArgs;
+use Doctrine\CodeGenerator\GenerationProject;
+use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\ProjectEvent;
 
-/**
- * Generated PHP Code Event Arguments
- */
-class GeneratorEvent extends EventArgs
+class GenerateClassesListener extends AbstractCodeListener
 {
-    const onGenerateClass = 'onGenerateClass';
-    const onGenerateProperty = 'onGenerateProperty';
-    const onGenerateMethod = 'onGenerateMethod';
-    const onGenerateGetter = 'onGenerateGetter';
-    const onGenerateSetter = 'onGenerateSetter';
-    const onGenerateConstructor = 'onGenerateConstructor';
-    const onGenerateFunction = 'onGenerateFunction';
-    const onGenerateInterface = 'onGenerateInterface';
-    const onGenerateTrait = 'onGenerateTrait';
-    const onGenerateParameter = 'onGenerateParameter';
+    /**
+     * @var array
+     */
+    private $config;
 
-    private $node;
-    private $project;
-
-    public function __construct(PHPParser_Node $node, $project = null)
+    public function __construct(array $config)
     {
-        $this->node = $node;
-        $this->project = $project;
+        $this->config = $config;
     }
 
-    public function getNode()
+    public function onStartGeneration(ProjectEvent $event)
     {
-        return $this->node;
-    }
+        $project = $event->getProject();
 
-    public function getProject()
-    {
-        return $this->project;
+        foreach ($this->config['classes'] as $className => $struct) {
+            $builder = ClassBuilder::newClass($className);
+            foreach ($struct['properties'] as $propertyName => $propertyStruct) {
+                $builder->appendProperty($propertyName);
+            }
+
+            $file = $project->getEmptyClass($className);
+            $file->append($builder->getNode());
+        }
     }
 }
 

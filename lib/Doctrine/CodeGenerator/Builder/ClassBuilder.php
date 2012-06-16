@@ -58,7 +58,7 @@ class ClassBuilder
             if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
                   $stmt instanceof \PHPParser_Node_Stmt_Function) &&
                 strtolower($stmt->name) === strtolower($name)) {
-                return $stmt;
+                return new MethodBuilder($stmt, $this);
             }
         }
         return $this->appendMethod($name);

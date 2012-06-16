@@ -76,7 +76,6 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         $this->visited->attach($node);
         $this->counter++;
         $this->evm->dispatchEvent($event, new GeneratorEvent($node));
-        $this->visited->detach($node);
     }
 
     public function leaveNode(PHPParser_Node $node)
@@ -87,8 +86,6 @@ class EventsVisitor extends PHPParser_NodeVisitorAbstract
         }
 
         $event = "post" . substr($event, 2);
-
-        $this->visited->attach($node);
         $this->evm->dispatchEvent($event, new GeneratorEvent($node));
     }
 

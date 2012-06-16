@@ -19,39 +19,30 @@
 
 namespace Doctrine\CodeGenerator;
 
-use PHPParser_Node;
 use Doctrine\Common\EventArgs;
 
 /**
- * Generated PHP Code Event Arguments
+ * Project-wide event arguments
+ *
+ * @author Benjamin Eberlei <kontakt@beberlei.de>
  */
-class GeneratorEvent extends EventArgs
+class ProjectEvent extends EventArgs
 {
-    const onGenerateClass = 'onGenerateClass';
-    const onGenerateProperty = 'onGenerateProperty';
-    const onGenerateMethod = 'onGenerateMethod';
-    const onGenerateGetter = 'onGenerateGetter';
-    const onGenerateSetter = 'onGenerateSetter';
-    const onGenerateConstructor = 'onGenerateConstructor';
-    const onGenerateFunction = 'onGenerateFunction';
-    const onGenerateInterface = 'onGenerateInterface';
-    const onGenerateTrait = 'onGenerateTrait';
-    const onGenerateParameter = 'onGenerateParameter';
+    const onStartGeneration = 'onStartGeneration';
 
-    private $node;
+    /**
+     * @var GenerationProject
+     */
     private $project;
 
-    public function __construct(PHPParser_Node $node, $project = null)
+    public function __construct(GenerationProject $project)
     {
-        $this->node = $node;
         $this->project = $project;
     }
 
-    public function getNode()
-    {
-        return $this->node;
-    }
-
+    /**
+     * @return GenerationProject
+     */
     public function getProject()
     {
         return $this->project;
