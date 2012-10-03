@@ -46,7 +46,7 @@ class Parser
 
     public function parseString($code)
     {
-        $stmts = $this->parser->parse(new PHPParser_Lexer($code));
+        $stmts = $this->parser->parse($code);
         $this->traverser->traverse($stmts);
         return $stmts;
     }
