@@ -27,6 +27,7 @@ use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\CodeGenerator\ProjectEvent;
+use Doctrine\CodeGenerator\ProjectWriter;
 
 class GenerateCommand extends Command
 {
@@ -65,7 +66,7 @@ EOF
         $parent       = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
         $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm);
         $visitors     = array($parent, $eventvisitor);
-        $project      = new \Doctrine\CodeGenerator\GenerationProject($destination, $visitors);
+        $project      = new \Doctrine\CodeGenerator\GenerationProject($visitors);
 
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if ( ! is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
@@ -95,7 +96,9 @@ EOF
             $project->traverse();
             $lc++;
         } while($eventvisitor->getCounter() > 0 && $lc < 100);
-        $project->write();
+
+        $writer = new ProjectWriter($destination);
+        $writer->write($project);
     }
 }
 

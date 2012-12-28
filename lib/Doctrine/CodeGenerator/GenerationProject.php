@@ -22,8 +22,6 @@ namespace Doctrine\CodeGenerator;
 use PHPParser_Parser;
 use PHPParser_Lexer;
 use PHPParser_NodeTraverser;
-use PHPParser_PrettyPrinterAbstract;
-use PHPParser_PrettyPrinter_Zend;
 
 class GenerationProject
 {
@@ -33,15 +31,14 @@ class GenerationProject
     private $files = array();
     private $printer;
 
-    public function __construct($root, array $visitors = array(), PHPParser_Parser $parser = null, PHPParser_PrettyPrinterAbstract $printer = null)
+    public function __construct(array $visitors = array())
     {
-        $this->root = $root;
         $this->traverser = new PHPParser_NodeTraverser();
-        $this->parser = new Parser($this->traverser, $parser ?: new PHPParser_Parser(new PHPParser_Lexer));
+        $this->parser = new Parser($this->traverser, new PHPParser_Parser(new PHPParser_Lexer));
+
         foreach ($visitors as $visitor) {
             $this->traverser->addVisitor($visitor);
         }
-        $this->printer = $printer ?: new PHPParser_PrettyPrinter_Zend();
     }
 
     public function getEmptyClass($className)
@@ -59,13 +56,9 @@ class GenerationProject
     public function getFile($path)
     {
         if ( ! isset($this->files[$path])) {
-            if (file_exists($this->root . "/" . $path)) {
-                $this->files[$path] = $this->parser->parseFile($this->root . "/" . $path);
-            } else {
-                $this->files[$path] = array();
-            }
-            $this->files[$path] = new File($path, $this->files[$path]);
+            $this->files[$path] = new File($path, array());
         }
+
         return $this->files[$path];
     }
 
@@ -78,19 +71,6 @@ class GenerationProject
     {
         foreach ($this->files as $file) {
             $file->traverse($this->traverser);
-        }
-    }
-
-    public function write()
-    {
-        foreach ($this->files as $file) {
-            $path = $this->root . "/" . $file->getPath();
-            $dir = dirname($path);
-            if (!file_exists($dir)) {
-                mkdir($dir, 0777, true);
-            }
-            $code = "<?php\n" . $file->prettyPrint($this->printer);
-            file_put_contents($path, $code);
         }
     }
 }

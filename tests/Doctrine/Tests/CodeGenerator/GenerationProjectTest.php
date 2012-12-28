@@ -7,20 +7,20 @@ class GenerationProjectTest extends \PHPUnit_Framework_TestCase
 {
     public function testCreate()
     {
-        $project = new GenerationProject(__DIR__ . "/_files");
+        $project = new GenerationProject();
         $this->assertEquals(0, count($project->getFiles()));
     }
 
     public function testGetFile()
     {
-        $project = new GenerationProject(__DIR__ . "/_files");
+        $project = new GenerationProject();
 
         $this->assertInstanceOf('Doctrine\CodeGenerator\File', $project->getFile('test.php'));
     }
 
     public function testTraverseEmpty()
     {
-        $project = new GenerationProject(__DIR__ . "/_files");
+        $project = new GenerationProject();
         $project->traverse();
     }
 }

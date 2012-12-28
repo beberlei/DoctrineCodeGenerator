@@ -32,15 +32,6 @@ class CollectionListener extends AbstractCodeListener
         $this->metadataFactory = $metadata;
     }
 
-    public function onVoteGetterSetter($event)
-    {
-        $propertyNode = $event->getNode();
-
-        if ($this->isToManyAssocation($propertyNode)) {
-            $event->denySetter();
-        }
-    }
-
     private function isToManyAssocation($propertyNode)
     {
         $mapping = $propertyNode->props[0]->getAttribute('mapping');
