@@ -66,7 +66,7 @@ class GenerateProjectListener extends AbstractCodeListener
         foreach ($this->metadataFactory->getAllMetadata() as $metadata) {
             $classNode = $this->generateClass($metadata);
 
-            $file = $project->getEmptyClass($metadata->name);
+            $file = $project->getClass($metadata->name);
             $file->append($classNode);
         }
     }

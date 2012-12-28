@@ -43,15 +43,11 @@ class GenerateClassesListener extends AbstractCodeListener
         $manipulator = new Manipulator;
 
         foreach ($this->config['classes'] as $className => $struct) {
-            $builder = $code->classBuilder($className);
-            $class   = $builder->getNode();
+            $class = $project->getClass($className);
 
             foreach ($struct['properties'] as $propertyName => $propertyStruct) {
-                $manipulator->addProperty($class, $code->property($propertyName));
+                $property = $class->getProperty($propertyName);
             }
-
-            $file = $project->getEmptyClass($className);
-            $file->append($class);
         }
     }
 }

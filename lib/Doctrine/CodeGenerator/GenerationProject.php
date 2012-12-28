@@ -19,59 +19,38 @@
 
 namespace Doctrine\CodeGenerator;
 
+use Doctrine\CodeGenerator\Builder\ClassBuilder;
 use PHPParser_Parser;
 use PHPParser_Lexer;
 use PHPParser_NodeTraverser;
 
 class GenerationProject
 {
-    private $root;
-    private $parser;
-    private $traverser;
-    private $files = array();
-    private $printer;
+    private $classes   = array();
+    private $functions = array();
 
-    public function __construct(array $visitors = array())
+    public function getClass($className)
     {
-        $this->traverser = new PHPParser_NodeTraverser();
-        $this->parser = new Parser($this->traverser, new PHPParser_Parser(new PHPParser_Lexer));
-
-        foreach ($visitors as $visitor) {
-            $this->traverser->addVisitor($visitor);
-        }
-    }
-
-    public function getEmptyClass($className)
-    {
-        $path = str_replace(array("\\", "_"), "/", $className) . ".php";
-        return $this->getEmptyFile($path);
-    }
-
-    public function getEmptyFile($path)
-    {
-        $this->files[$path] = new File($path, array());
-        return $this->files[$path];
-    }
-
-    public function getFile($path)
-    {
-        if ( ! isset($this->files[$path])) {
-            $this->files[$path] = new File($path, array());
+        if ( ! isset($this->classes[$className])) {
+            $this->classes[$className] = new ClassBuilder($className);
         }
 
-        return $this->files[$path];
+        return $this->classes[$className];
+    }
+
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    public function getFunction($functionName)
+    {
+        throw new \BadMethodCallException("not implemented yet");
     }
 
     public function getFiles()
     {
-        return $this->files;
-    }
-
-    public function traverse()
-    {
-        foreach ($this->files as $file) {
-            $file->traverse($this->traverser);
-        }
+        return array();
     }
 }
 

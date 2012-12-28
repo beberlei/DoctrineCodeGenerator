@@ -28,6 +28,7 @@ use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\CodeGenerator\ProjectEvent;
 use Doctrine\CodeGenerator\ProjectWriter;
+use Doctrine\CodeGenerator\EventGenerator;
 
 class GenerateCommand extends Command
 {
@@ -63,10 +64,7 @@ EOF
 
         $evm          = new \Doctrine\Common\EventManager;
         $code         = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
-        $parent       = new \Doctrine\CodeGenerator\Visitor\ParentVisitor();
-        $eventvisitor = new \Doctrine\CodeGenerator\Visitor\EventsVisitor($evm);
-        $visitors     = array($parent, $eventvisitor);
-        $project      = new \Doctrine\CodeGenerator\GenerationProject($visitors);
+        $project      = new \Doctrine\CodeGenerator\GenerationProject();
 
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if ( ! is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
@@ -89,13 +87,8 @@ EOF
             }
         }
 
-        $evm->dispatchEvent(ProjectEvent::onStartGeneration, new ProjectEvent($project));
-
-        $lc = 0;
-        do {
-            $project->traverse();
-            $lc++;
-        } while($eventvisitor->getCounter() > 0 && $lc < 100);
+        $eventGenerator = new EventGenerator($evm);
+        $eventGenerator->generate($project);
 
         $writer = new ProjectWriter($destination);
         $writer->write($project);

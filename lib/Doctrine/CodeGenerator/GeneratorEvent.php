@@ -19,7 +19,6 @@
 
 namespace Doctrine\CodeGenerator;
 
-use PHPParser_Node;
 use Doctrine\Common\EventArgs;
 
 /**
@@ -41,7 +40,7 @@ class GeneratorEvent extends EventArgs
     private $node;
     private $project;
 
-    public function __construct(PHPParser_Node $node, $project = null)
+    public function __construct($node, $project)
     {
         $this->node = $node;
         $this->project = $project;

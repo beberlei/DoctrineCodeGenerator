@@ -17,35 +17,13 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator\Visitor;
+namespace Doctrine\CodeGenerator\Builder;
 
-use PHPParser_NodeVisitorAbstract;
-use PHPParser_Node;
-
-/**
- * Powerhouse of the CodeGenerator, it will listen to all the fun stuff and
- * trigger events for interesing PHP statements.
- *
- * @author Benjamin Eberlei <kontakt@beberlei.de>
- */
-class ParentVisitor extends PHPParser_NodeVisitorAbstract
+interface Visitor
 {
-    /**
-     * @var array
-     */
-    private $parents = array();
-
-    public function enterNode(PHPParser_Node $node)
-    {
-        $parent = end($this->parents);
-        if ($parent) {
-            $node->setAttribute('parent', $parent);
-        }
-        $this->parents[] = $node;
-    }
-
-    public function leaveNode(PHPParser_Node $node)
-    {
-        array_pop($this->parents);
-    }
+    public function visitClass(ClassBuilder $class);
+    public function visitMethod(MethodBuilder $method);
+    public function visitProperty(PropertyBuilder $property);
+    public function visitFunction(FunctionBuilder $function);
 }
+

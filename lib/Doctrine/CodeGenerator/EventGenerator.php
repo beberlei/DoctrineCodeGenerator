@@ -17,27 +17,33 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\CodeGenerator\Builder;
+namespace Doctrine\CodeGenerator;
 
-use PHPParser_Node_Stmt_ClassMethod;
-use PHPParser_Node_Param;
-use PHPParser_Builder_Method;
+use Doctrine\Common\EventManager;
 
-class MethodBuilder extends PHPParser_Builder_Method
+class EventGenerator
 {
-    /**
-     * @return MethodBuilder
-     */
-    public function param($name, $default = null, $type = null, $byRef = false)
+    private $evm;
+
+    public function __construct(EventManager $evm)
     {
-        $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
-        $this->params[] = $param;
-        return $this;
+        $this->evm = $evm;
     }
 
-    public function visit(Visitor $visitor)
+    public function generate(GenerationProject $project)
     {
-        $visitor->visitMethod($this);
+        $visitor = new EventGeneratorVisitor($this->evm, $project);
+
+        $this->evm->dispatchEvent(ProjectEvent::onStartGeneration, new ProjectEvent($project));
+
+        do {
+            $cnt = count($visitor);
+
+            // TODO: GenerationProject a "Builder" as well?
+            foreach ($project->getClasses() as $class) {
+                $class->visit($visitor);
+            }
+        } while ($cnt < count($visitor));
     }
 }
 

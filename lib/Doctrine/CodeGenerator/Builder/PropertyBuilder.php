@@ -19,25 +19,55 @@
 
 namespace Doctrine\CodeGenerator\Builder;
 
-use PHPParser_Node_Stmt_ClassMethod;
-use PHPParser_Node_Param;
-use PHPParser_Builder_Method;
+use PHPParser_Builder_Property;
 
-class MethodBuilder extends PHPParser_Builder_Method
+class PropertyBuilder
 {
-    /**
-     * @return MethodBuilder
-     */
-    public function param($name, $default = null, $type = null, $byRef = false)
+    private $builder;
+
+    public function __construct($name)
     {
-        $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
-        $this->params[] = $param;
+        $this->builder = new PHPParser_Builder_Property($name);
+    }
+
+    public function makeStatic()
+    {
+        $this->builder->makeStatic();
         return $this;
+    }
+
+    public function makePublic()
+    {
+        $this->builder->makePublic();
+        return $this;
+    }
+
+    public function makeProtected()
+    {
+        $this->builder->makeProtected();
+        return $this;
+    }
+
+    public function makePrivate()
+    {
+        $this->builder->makePrivate();
+        return $this;
+    }
+
+    public function setDefault($value)
+    {
+        $this->builder->setDefault($value);
+        return $this;
+    }
+
+    public function getNode()
+    {
+        return $this->builder->getNode();
     }
 
     public function visit(Visitor $visitor)
     {
-        $visitor->visitMethod($this);
+        $visitor->visitProperty($this);
     }
 }
 

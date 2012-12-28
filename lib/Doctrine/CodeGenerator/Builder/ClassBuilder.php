@@ -19,63 +19,52 @@
 
 namespace Doctrine\CodeGenerator\Builder;
 
-use PHPParser_Node_Stmt_Class;
-use PHPParser_Node_Stmt_ClassMethod;
 use PHPParser_Builder_Class;
 
 /**
  * Class Builder
  */
-class ClassBuilder extends PHPParser_Builder_Class
+class ClassBuilder
 {
-    /**
-     * @return \Doctrine\CodeGenerator\Builder\MethodBuilder
-     */
-    public function method($name)
+    private $name;
+    private $builder;
+    private $properties = array();
+    private $constants  = array();
+    private $methods    = array();
+
+    public function __construct($name)
     {
-        return new MethodBuilder($name);
+        $this->name    = $name;
+        $this->builder = new PHPParser_Builder_Class($name);
     }
 
-    public function findMethod($name)
+    public function getName()
     {
-        $builder = $this->method($name);
+        return $this->name;
+    }
 
-        foreach ($this->methods as $stmt) {
-            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
-                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
-                 strtolower($stmt->name) === strtolower($name)) {
+    public function extend($parentClassName)
+    {
+        $this->builder->extend($parentClassName);
+        return $this;
+    }
 
-                $builder->addStmts($stmt->stmts);
+    public function implement($interfaceName)
+    {
+        $this->builder->implement($interfaceName);
+        return $this;
+    }
 
-                if ($stmt instanceof \PHPParser_Node_Stmt_Function) {
-                    return $builder;
-                }
+    public function makeAbstract()
+    {
+        $this->builder->makeAbstract();
+        return $this;
+    }
 
-                if ($stmt->isPublic()) {
-                    $builder->makePublic();
-                }
-
-                if ($stmt->isPrivate()) {
-                    $builder->makePrivate();
-                }
-
-                if ($stmt->isProtected()) {
-                    $builder->makeProtected();
-                }
-
-                if ($stmt->isFinal()) {
-                    $builder->makeFinal();
-                }
-
-                if ($stmt->isAbstract()) {
-                    $builder->makeAbstract();
-                }
-
-                return $builder;
-            }
-        }
-
-        return $builder;
+    public function makeFinal()
+    {
+        $this->builder->makeFinal();
+        return $this;
     }
 
     /**
@@ -86,41 +75,20 @@ class ClassBuilder extends PHPParser_Builder_Class
      */
     public function hasMethod($name)
     {
-        return $this->getMethod($name) !== null;
+        return isset($this->methods[$name]);
     }
 
     /**
      * @param string $name
-     * @return PHPParser_Node_Stmt_ClassMethod
+     * @return MethodBuilder
      */
     public function getMethod($name)
     {
-        foreach ($this->methods as $stmt) {
-            if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
-                  $stmt instanceof \PHPParser_Node_Stmt_Function) &&
-                strtolower($stmt->name) === strtolower($name)) {
-                return $stmt;
-            }
+        if ( ! isset($this->methods[$name])) {
+            $this->methods[$name] = new MethodBuilder($name);
         }
-        return null;
-    }
 
-    /**
-     * Add a new property with given name.
-     *
-     * No support for multiple names per modifier and no checks for already
-     * existing properties.
-     *
-     * @param string $name
-     * @param int $modifiers
-     * @return \Doctrine\CodeGenerator\Builder\ClassBuilder
-     */
-    public function property($name, $modifiers = PHPParser_Node_Stmt_Class::MODIFIER_PUBLIC)
-    {
-        $pp = new \PHPParser_Node_Stmt_PropertyProperty($name);
-        $property = new \PHPParser_Node_Stmt_Property($modifiers, array($pp));
-        $this->properties[] = $property;
-        return $this;
+        return $this->methods[$name];
     }
 
     /**
@@ -131,27 +99,38 @@ class ClassBuilder extends PHPParser_Builder_Class
      */
     public function hasProperty($name)
     {
-        return $this->getProperty($name) !== null;
+        return isset($this->properties[$name]);
     }
 
     /**
      * @param string $name
-     * @return PHPParser_Node_Stmt_PropertyProperty
+     * @return PropertyBuilder
      */
     public function getProperty($name)
     {
-        foreach ($this->properties as $stmt) {
-            if ( ! ($stmt instanceof \PHPParser_Node_Stmt_Property)) {
-                continue;
-            }
-
-            foreach ($stmt->props as $property) {
-                if ($property->name === $name) {
-                    return $property;
-                }
-            }
+        if ( ! $this->hasProperty($name)) {
+            $this->properties[$name] = new PropertyBuilder($name);
         }
-        return null;
+
+        return $this->properties[$name];
+    }
+
+    public function getNode()
+    {
+        foreach ($this->properties as $property) {
+            $this->builder->addStmt($property->getNode());
+        }
+
+        foreach ($this->methods as $method) {
+            $this->builder->addStmt($method->getNode());
+        }
+
+        return $this->builder->getNode();
+    }
+
+    public function visit(Visitor $visitor)
+    {
+        $visitor->visitClass($this);
     }
 }
 
