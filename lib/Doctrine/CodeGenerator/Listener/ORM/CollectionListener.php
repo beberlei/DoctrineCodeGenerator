@@ -58,7 +58,7 @@ class CollectionListener extends AbstractCodeListener
         $adder->param($property->getName());
         $adder->append(array(
             $code->assignment(
-                $code->arrayDimFetch($code->instanceVariable($property->name)),
+                $code->arrayDimFetch($code->instanceVariable($property->getName())),
                 $code->variable($property->getName())
             )
         ));

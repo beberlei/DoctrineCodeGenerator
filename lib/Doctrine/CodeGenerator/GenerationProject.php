@@ -51,7 +51,15 @@ class GenerationProject
 
         foreach ($this->classes as $class) {
             $path = str_replace(array("\\", "_"), "/", $class->getName()) . ".php";
-            $files[] = new File($path, array($class->getNode()));
+            $stmts = array($class->getNode());
+
+            if ($class->getNamespace()) {
+                $stmts = array(
+                    new \PHPParser_Node_Stmt_Namespace(new \PHPParser_Node_Name($class->getNamespace()), $stmts)
+                );
+            }
+
+            $files[] = new File($path, $stmts);
         }
 
         return $files;

@@ -27,6 +27,7 @@ use PHPParser_Builder_Class;
 class ClassBuilder extends AbstractBuilder
 {
     private $name;
+    private $namespace;
     private $builder;
     private $properties = array();
     private $constants  = array();
@@ -35,7 +36,21 @@ class ClassBuilder extends AbstractBuilder
     public function __construct($name)
     {
         parent::__construct($name);
-        $this->builder = new PHPParser_Builder_Class($name);
+
+        $namespace = false;
+        if (strpos($name, "\\") !== false) {
+            $parts = explode("\\", $name);
+            $name  = array_pop($parts);
+            $namespace = implode("\\", $parts);
+        }
+
+        $this->builder   = new PHPParser_Builder_Class($name);
+        $this->namespace = $namespace;
+    }
+
+    public function getNamespace()
+    {
+        return $this->namespace;
     }
 
     public function extend($parentClassName)

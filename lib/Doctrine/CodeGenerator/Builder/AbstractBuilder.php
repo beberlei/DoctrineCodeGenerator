@@ -43,6 +43,10 @@ abstract class AbstractBuilder
 
     public function getAttribute($name)
     {
+        if ( ! isset($this->attributes[$name])) {
+            return null;
+        }
+
         return $this->attributes[$name];
     }
 
