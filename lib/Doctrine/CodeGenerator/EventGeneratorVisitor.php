@@ -82,7 +82,7 @@ class EventGeneratorVisitor implements Visitor, Countable
 
         $this->visited->attach($builder);
 
-        $this->evm->dispatchEvent($eventName, new GeneratorEvent($builder, $project));
+        $this->evm->dispatchEvent($eventName, new GeneratorEvent($builder, $this->project));
     }
 
     public function count()

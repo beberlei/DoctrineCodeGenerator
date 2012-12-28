@@ -19,44 +19,30 @@
 
 namespace Doctrine\CodeGenerator\Builder;
 
-use PHPParser_Node_Stmt_ClassMethod;
-use PHPParser_Node_Param;
-use PHPParser_Builder_Method;
-
-class MethodBuilder extends AbstractBuilder
+abstract class AbstractBuilder
 {
-    private $builder;
+    private $name;
+    private $attributes;
 
     public function __construct($name)
     {
-        parent::__construct($name);
-        $this->builder = new PHPParser_Builder_Method($name);
+        $this->name = $name;
     }
 
-    public function append($stmts)
+    public function getName()
     {
-        $this->builder->addStmts($stmts);
+        return $this->name;
+    }
+
+    public function setAttribute($name, $value)
+    {
+        $this->attributes[$name] = $value;
         return $this;
     }
 
-    /**
-     * @return MethodBuilder
-     */
-    public function param($name, $default = null, $type = null, $byRef = false)
+    public function getAttribute($name)
     {
-        $param = new PHPParser_Node_Param($name, $default, $type, $byRef);
-        $this->params[] = $param;
-        return $this;
-    }
-
-    public function visit(Visitor $visitor)
-    {
-        $visitor->visitMethod($this);
-    }
-
-    public function getNode()
-    {
-        return $this->builder->getNode();
+        return $this->attributes[$name];
     }
 }
 

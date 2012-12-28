@@ -21,12 +21,13 @@ namespace Doctrine\CodeGenerator\Builder;
 
 use PHPParser_Builder_Property;
 
-class PropertyBuilder
+class PropertyBuilder extends AbstractBuilder
 {
     private $builder;
 
     public function __construct($name)
     {
+        parent::__construct($name);
         $this->builder = new PHPParser_Builder_Property($name);
     }
 

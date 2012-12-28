@@ -41,7 +41,7 @@ class TimestampableListener extends AbstractCodeListener
         $code  = $this->code;
         $class = $event->getNode();
 
-        if ( ! in_array($class->name, $this->classes)) {
+        if ( ! in_array($class->getName(), $this->classes)) {
             return;
         }
 
@@ -50,29 +50,22 @@ class TimestampableListener extends AbstractCodeListener
 
     public function makeTimestampable($class, $code)
     {
-        $manipulator = new Manipulator();
-        $constructor = $manipulator->findMethod($class, '__construct');
+        $constructor = $class->getMethod('__construct');
 
-        $updatedProperty = $code->property('updated')->makeProtected()->getNode();
-        $createdProperty = $code->property('created')->makeProtected()->getNode();
+        $class->getProperty('updated')->makeProtected()->setAttribute('type', 'DateTime');
+        $class->getProperty('created')->makeProtected()->setAttribute('type', 'DateTime');
 
-        $updatedProperty->props[0]->setAttribute('type', 'DateTime');
-        $createdProperty->props[0]->setAttribute('type', 'DateTime');
-
-        $manipulator->addProperty($class, $createdProperty);
-        $manipulator->addProperty($class, $updatedProperty);
-
-        $manipulator
-            ->append($constructor,
+        $constructor->append(array(
+            $code->assignment(
+                $code->instanceVariable('created'),
                 $code->assignment(
-                    $code->instanceVariable('created'),
-                    $code->assignment(
-                        $code->instanceVariable('updated'),
-                        $code->instantiate('DateTime')
-                    )
+                    $code->instanceVariable('updated'),
+                    $code->instantiate('DateTime')
                 )
             )
-            ->append($class, $code->classCode(<<<ETS
+        ));
+
+        $class->append($code->classCode(<<<ETS
 public function getCreated()
 {
     return \$this->created;

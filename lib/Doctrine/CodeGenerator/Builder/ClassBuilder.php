@@ -24,7 +24,7 @@ use PHPParser_Builder_Class;
 /**
  * Class Builder
  */
-class ClassBuilder
+class ClassBuilder extends AbstractBuilder
 {
     private $name;
     private $builder;
@@ -34,13 +34,8 @@ class ClassBuilder
 
     public function __construct($name)
     {
-        $this->name    = $name;
+        parent::__construct($name);
         $this->builder = new PHPParser_Builder_Class($name);
-    }
-
-    public function getName()
-    {
-        return $this->name;
     }
 
     public function extend($parentClassName)
@@ -113,6 +108,12 @@ class ClassBuilder
         }
 
         return $this->properties[$name];
+    }
+
+    public function append($stmts)
+    {
+        $this->builder->addStmts($stmts);
+        return $this;
     }
 
     public function getNode()
