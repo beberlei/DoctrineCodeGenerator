@@ -26,11 +26,18 @@ use PHPParser_Builder_Method;
 class MethodBuilder extends AbstractBuilder
 {
     private $builder;
+    private $class;
 
-    public function __construct($name)
+    public function __construct($name, ClassBuilder $class)
     {
         parent::__construct($name);
+        $this->class = $class;
         $this->builder = new PHPParser_Builder_Method($name);
+    }
+
+    public function getClass()
+    {
+        return $this->class;
     }
 
     public function append($stmts)

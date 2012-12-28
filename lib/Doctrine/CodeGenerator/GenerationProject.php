@@ -20,9 +20,6 @@
 namespace Doctrine\CodeGenerator;
 
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
-use PHPParser_Parser;
-use PHPParser_Lexer;
-use PHPParser_NodeTraverser;
 
 class GenerationProject
 {
@@ -50,7 +47,14 @@ class GenerationProject
 
     public function getFiles()
     {
-        return array();
+        $files = array();
+
+        foreach ($this->classes as $class) {
+            $path = str_replace(array("\\", "_"), "/", $class->getName()) . ".php";
+            $files[] = new File($path, array($class->getNode()));
+        }
+
+        return $files;
     }
 }
 

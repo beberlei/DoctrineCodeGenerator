@@ -23,6 +23,7 @@ abstract class AbstractBuilder
 {
     private $name;
     private $attributes;
+    private $docComment;
 
     public function __construct($name)
     {
@@ -43,6 +44,16 @@ abstract class AbstractBuilder
     public function getAttribute($name)
     {
         return $this->attributes[$name];
+    }
+
+    public function setDocComment($comment)
+    {
+        $this->docComment = $comment;
+    }
+
+    public function getDocComment()
+    {
+        return $this->docComment;
     }
 }
 

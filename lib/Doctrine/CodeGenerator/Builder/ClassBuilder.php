@@ -80,7 +80,7 @@ class ClassBuilder extends AbstractBuilder
     public function getMethod($name)
     {
         if ( ! isset($this->methods[$name])) {
-            $this->methods[$name] = new MethodBuilder($name);
+            $this->methods[$name] = new MethodBuilder($name, $this);
         }
 
         return $this->methods[$name];
@@ -104,7 +104,7 @@ class ClassBuilder extends AbstractBuilder
     public function getProperty($name)
     {
         if ( ! $this->hasProperty($name)) {
-            $this->properties[$name] = new PropertyBuilder($name);
+            $this->properties[$name] = new PropertyBuilder($name, $this);
         }
 
         return $this->properties[$name];
@@ -118,20 +118,31 @@ class ClassBuilder extends AbstractBuilder
 
     public function getNode()
     {
+        $manipulator = new Manipulator();
         foreach ($this->properties as $property) {
-            $this->builder->addStmt($property->getNode());
+            $property = $manipulator->setDocComment($property->getNode(), $property->getDocComment());
+            $this->builder->addStmt($property);
         }
 
         foreach ($this->methods as $method) {
-            $this->builder->addStmt($method->getNode());
+            $method = $manipulator->setDocComment($method->getNode(), $method->getDocComment());
+            $this->builder->addStmt($method);
         }
 
-        return $this->builder->getNode();
+        return $manipulator->setDocComment($this->builder->getNode(), $this->getDocComment());
     }
 
     public function visit(Visitor $visitor)
     {
         $visitor->visitClass($this);
+
+        foreach ($this->properties as $property) {
+            $visitor->visitProperty($property);
+        }
+
+        foreach ($this->methods as $method) {
+            $visitor->visitMethod($method);
+        }
     }
 }
 

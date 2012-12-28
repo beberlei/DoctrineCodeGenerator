@@ -31,12 +31,10 @@ class FluentSetterListener extends AbstractCodeListener
     {
         $node        = $event->getNode();
         $code        = $this->code;
-        $manipulator = new Manipulator();
 
-        $manipulator->append(
-            $node,
+        $node->append(array(
             $code->returnStmt($code->variable('this'))
-        );
+        ));
     }
 }
 

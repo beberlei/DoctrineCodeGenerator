@@ -30,10 +30,9 @@ class DocListener extends AbstractCodeListener
     public function onGenerateProperty(GeneratorEvent $event)
     {
         $node        = $event->getNode();
-        $type        = $node->props[0]->getAttribute('type') ?: 'mixed';
-        $manipulator = new Manipulator();
+        $type        = $node->getAttribute('type') ?: 'mixed';
 
-        $manipulator->setDocComment($node, <<<EPM
+        $node->setDocComment($node, <<<EPM
 /**
  * @var $type
  */
@@ -46,9 +45,8 @@ EPM
         $node         = $event->getNode();
         $type         = $this->getMethodsPropertyType($node);
         $propertyName = $this->getPropertyName($node);
-        $manipulator  = new Manipulator();
 
-        $manipulator->setDocComment($node, <<<EPM
+        $node->setDocComment($node, <<<EPM
 /**
  * Return $propertyName
  *
@@ -63,9 +61,8 @@ EPM
         $node         = $event->getNode();
         $type         = $this->getMethodsPropertyType($node);
         $propertyName = $this->getPropertyName($node);
-        $manipulator  = new Manipulator();
 
-        $manipulator->setDocComment($node, <<<EPM
+        $node->setDocComment($node, <<<EPM
 /**
  * Set $propertyName
  *
@@ -98,9 +95,11 @@ EPM
     private function getPropertyName($node)
     {
         $property = $node->getAttribute('property');
+
         if ($property) {
-            return $property->name;
+            return $property->getName();
         }
+
         return lcfirst(substr($node->name, 3));
     }
 }
