@@ -21,7 +21,6 @@ namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GenerationProject;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
-use Doctrine\CodeGenerator\Builder\Manipulator;
 use Doctrine\CodeGenerator\ProjectEvent;
 
 class GenerateClassesListener extends AbstractCodeListener
@@ -40,7 +39,6 @@ class GenerateClassesListener extends AbstractCodeListener
     {
         $project = $event->getProject();
         $code    = $this->code;
-        $manipulator = new Manipulator;
 
         foreach ($this->config['classes'] as $className => $struct) {
             $class = $project->getClass($className);

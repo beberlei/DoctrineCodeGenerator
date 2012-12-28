@@ -64,10 +64,8 @@ class GenerateProjectListener extends AbstractCodeListener
         $project = $event->getProject();
 
         foreach ($this->metadataFactory->getAllMetadata() as $metadata) {
-            $classNode = $this->generateClass($metadata);
-
-            $file = $project->getClass($metadata->name);
-            $file->append($classNode);
+            $class = $project->getClass($metadata->name);
+            $this->generateClass($class, $metadata);
         }
     }
 
@@ -77,13 +75,10 @@ class GenerateProjectListener extends AbstractCodeListener
      * @param ClassMetadataInfo $metadata
      * @return PHPParser_Node_Stmt_Class
      */
-    public function generateClass(ClassMetadataInfo $metadata)
+    public function generateClass($class, ClassMetadataInfo $metadata)
     {
-        $builder = $this->code->classBuilder($metadata->name);
-
         foreach ($metadata->fieldMappings as $fieldName => $fieldMapping) {
-            $builder->property($fieldName);
-            $property = $builder->getProperty($fieldName);
+            $property = $class->getProperty($fieldName);
 
             $property->setAttribute('isColumn', true);
             $property->setAttribute('type', isset($this->typeAlias[$fieldMapping['type']]) ? $this->typeAlias[$fieldMapping['type']] : $fieldMapping['type']);
@@ -91,15 +86,12 @@ class GenerateProjectListener extends AbstractCodeListener
         }
 
         foreach ($metadata->associationMappings as $assocName => $assoc) {
-            $builder->property($assocName);
-            $property = $builder->getProperty($assocName);
+            $property = $class->getProperty($assocName);
 
             $property->setAttribute('isAssociation', true);
             $property->setAttribute('type', $assoc['targetEntity']);
             $property->setAttribute('mapping', $assoc);
         }
-
-        return $builder->getNode();
     }
 }
 

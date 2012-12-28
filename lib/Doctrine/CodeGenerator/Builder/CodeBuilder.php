@@ -130,5 +130,13 @@ class CodeBuilder
     {
         return new \PHPParser_Node_Expr_New(new \PHPParser_Node_Name_FullyQualified($className));
     }
+
+    /**
+     * @return PHPParser_Node_Expr_ArrayDimFetch
+     */
+    public function arrayDimFetch($variable)
+    {
+        return new \PHPParser_Node_Expr_ArrayDimFetch($variable);
+    }
 }
 

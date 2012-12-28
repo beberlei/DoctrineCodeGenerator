@@ -32,7 +32,7 @@ class DocListener extends AbstractCodeListener
         $node        = $event->getNode();
         $type        = $node->getAttribute('type') ?: 'mixed';
 
-        $node->setDocComment($node, <<<EPM
+        $node->setDocComment(<<<EPM
 /**
  * @var $type
  */
@@ -46,7 +46,7 @@ EPM
         $type         = $this->getMethodsPropertyType($node);
         $propertyName = $this->getPropertyName($node);
 
-        $node->setDocComment($node, <<<EPM
+        $node->setDocComment(<<<EPM
 /**
  * Return $propertyName
  *
@@ -62,7 +62,7 @@ EPM
         $type         = $this->getMethodsPropertyType($node);
         $propertyName = $this->getPropertyName($node);
 
-        $node->setDocComment($node, <<<EPM
+        $node->setDocComment(<<<EPM
 /**
  * Set $propertyName
  *
@@ -79,14 +79,16 @@ EPM
 
         if ($property) {
             $type = $property->getAttribute('type');
-        } else if (preg_match('(^(set|get)(.*+)$)', $method->name, $match)) {
-            $class       = $method->getAttribute('parent');
-            $manipulator = new Manipulator();
-            $property    = $manipulator->getProperty($class, lcfirst($match[2]));
+        } else if (preg_match('(^(set|get)(.*+)$)', $method->getName(), $match)) {
+            $propertyName = lcfirst($match[2]);
+            $class        = $method->getClass();
 
-            if ($property) {
-                $type = $property->getAttribute('type');
+            if ( ! $class->hasProperty($propertyName)) {
+                return 'mixed';
             }
+
+            $property = $class->getProperty($propertyName);
+            $type     = $property->getAttribute('type');
         }
 
         return $type ?: 'mixed';

@@ -21,7 +21,6 @@ namespace Doctrine\CodeGenerator\Listener\ORM;
 
 use Doctrine\CodeGenerator\Listener\AbstractCodeListener;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\CodeGenerator\Builder\Manipulator;
 
 class CollectionListener extends AbstractCodeListener
 {
@@ -34,32 +33,35 @@ class CollectionListener extends AbstractCodeListener
 
     private function isToManyAssocation($propertyNode)
     {
-        $mapping = $propertyNode->props[0]->getAttribute('mapping');
-        return $propertyNode->props[0]->getAttribute('isAssociation') &&
+        $mapping = $propertyNode->getAttribute('mapping');
+        return $propertyNode->getAttribute('isAssociation') &&
                ($mapping['type'] & ClassMetadataInfo::TO_MANY) > 0;
     }
 
     public function onGenerateProperty($event)
     {
-        $propertyNode = $event->getNode();
+        $property = $event->getNode();
 
-        if ( ! $this->isToManyAssocation($propertyNode)) {
+        if ( ! $this->isToManyAssocation($property)) {
             return;
         }
 
-        $class       = $propertyNode->getAttribute('parent');
+        $class       = $property->getClass();
         $code        = $this->code;
-        $manipulator = new Manipulator;
-        $property    = $propertyNode->props[0];
-        $addMethod   = 'add' . ucfirst($property->name);
+        $addMethod   = 'add' . ucfirst($property->getName());
 
-        if ($manipulator->hasMethod($class, $addMethod)) {
+        if ($class->hasMethod($addMethod)) {
             return;
         }
 
-        $adder = $manipulator->findMethod($class, $addMethod);
-        $manipulator->param($adder, $property->name);
-        $manipulator->append($adder, $code->assignment(new \PHPParser_Node_Expr_ArrayDimFetch($code->instanceVariable($property->name)), $code->variable($property->name)));
+        $adder = $class->getMethod($addMethod);
+        $adder->param($property->getName());
+        $adder->append(array(
+            $code->assignment(
+                $code->arrayDimFetch($code->instanceVariable($property->name)),
+                $code->variable($property->getName())
+            )
+        ));
         $adder->setAttribute('property', $property);
     }
 }
