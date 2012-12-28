@@ -1,7 +1,7 @@
 {
     "name": "doctrine/code-generator",
     "require": {
-        "nikic/php-parser": "*",
+        "nikic/php-parser": "dev-master",
         "symfony/console": "*",
         "symfony/yaml": "*",
         "doctrine/common": "*"

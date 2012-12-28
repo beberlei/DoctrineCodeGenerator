@@ -38,15 +38,44 @@ class ClassBuilder extends PHPParser_Builder_Class
 
     public function findMethod($name)
     {
+        $builder = $this->method($name);
+
         foreach ($this->methods as $stmt) {
             if ( ($stmt instanceof \PHPParser_Node_Stmt_ClassMethod ||
                   $stmt instanceof \PHPParser_Node_Stmt_Function) &&
                  strtolower($stmt->name) === strtolower($name)) {
 
-                return new MethodBuilder($stmt, $this);
+                $builder->addStmts($stmt->stmts);
+
+                if ($stmt instanceof \PHPParser_Node_Stmt_Function) {
+                    return $builder;
+                }
+
+                if ($stmt->isPublic()) {
+                    $builder->makePublic();
+                }
+
+                if ($stmt->isPrivate()) {
+                    $builder->makePrivate();
+                }
+
+                if ($stmt->isProtected()) {
+                    $builder->makeProtected();
+                }
+
+                if ($stmt->isFinal()) {
+                    $builder->makeFinal();
+                }
+
+                if ($stmt->isAbstract()) {
+                    $builder->makeAbstract();
+                }
+
+                return $builder;
             }
         }
-        return $this->method($name);
+
+        return $builder;
     }
 
     /**

@@ -20,12 +20,14 @@
 namespace Doctrine\Tests\CodeGenerator\Builder;
 
 use PHPParser_Node_Stmt_Class;
+use PHPParser_Node_Stmt_ClassMethod;
 use PHPParser_Node_Stmt_Property;
 use PHPParser_Builder_Property;
 use Doctrine\CodeGenerator\Builder\Manipulator;
 use Doctrine\CodeGenerator\Builder\CodeBuilder;
+use Doctrine\Tests\CodeGenerator\TestCase;
 
-class ManipulatorTest extends \PHPUnit_Framework_TestCase
+class ManipulatorTest extends TestCase
 {
     public function testAddPropertyFromBuilder()
     {
@@ -145,6 +147,41 @@ class ManipulatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($manipulator->hasProperty($class, 'foo'));
         $manipulator->addProperty($class, $builder);
         $this->assertTrue($manipulator->hasProperty($class, 'foo'));
+    }
+
+    public function testGetProperty()
+    {
+        $class       = new PHPParser_Node_Stmt_Class("Test");
+        $manipulator = new Manipulator();
+
+        $builder     = new PHPParser_Builder_Property("foo");
+
+        $this->assertNull($manipulator->getProperty($class, 'foo'));
+        $manipulator->addProperty($class, $builder);
+        $this->assertInstanceOf('PHPParser_Node_Stmt_PropertyProperty', $manipulator->getProperty($class, 'foo'));
+    }
+
+    public function testParam()
+    {
+        $method = new PHPParser_Node_Stmt_ClassMethod("setFoo");
+        $manipulator = new Manipulator();
+
+        $manipulator->param($method, 'foo');
+        $manipulator->param($method, 'valid', null, null, true);
+        $manipulator->param($method, 'obj', 'stdClass');
+
+        $this->assertCodeStartsWith('public function setFoo($foo, &$valid, stdClass $obj)', $method);
+    }
+
+    public function testSetDocComment()
+    {
+        $class       = new PHPParser_Node_Stmt_Class("Test");
+        $manipulator = new Manipulator();
+
+        $manipulator->setDocComment($class, "Test!");
+        $manipulator->setDocComment($class, "Test1234!");
+
+        $this->assertEquals("Test1234!", $class->getDocComment()->getText());
     }
 }
 

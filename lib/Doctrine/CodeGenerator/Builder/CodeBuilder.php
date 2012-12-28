@@ -130,14 +130,5 @@ class CodeBuilder
     {
         return new \PHPParser_Node_Expr_New(new \PHPParser_Node_Name_FullyQualified($className));
     }
-
-    public function setDocComment($node, $comment)
-    {
-        $doc      = $node->getDocComment();
-        $comments = $node->getAttributes('comments');
-        if ($doc) {
-            unset($comments[ count($comments) - 1]);
-        }
-    }
 }
 
