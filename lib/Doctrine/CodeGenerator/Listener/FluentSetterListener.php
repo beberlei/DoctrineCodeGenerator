@@ -20,7 +20,7 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\CodeGenerator\Builder\Manipulator;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
 
 /**
  * Add Fluent $this return to every generated setter.
@@ -29,8 +29,8 @@ class FluentSetterListener extends AbstractCodeListener
 {
     public function onGenerateSetter(GeneratorEvent $event)
     {
-        $node        = $event->getNode();
-        $code        = $this->code;
+        $node = $event->getNode();
+        $code = new CodeBuilder();
 
         $node->append(array(
             $code->returnStmt($code->variable('this'))

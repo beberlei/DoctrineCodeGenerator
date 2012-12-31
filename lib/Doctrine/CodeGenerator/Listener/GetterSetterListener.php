@@ -21,6 +21,7 @@ namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
 
 /**
  * Each property is turned to protected and getters/setters are added.
@@ -33,7 +34,7 @@ class GetterSetterListener extends AbstractCodeListener
         //$property->makeProtected();
 
         $class       = $property->getClass();
-        $code        = $this->code;
+        $code        = new CodeBuilder();
 
         $setName  = 'set' . ucfirst($property->getName());
         $getName  = 'get' . ucfirst($property->getName());
@@ -55,11 +56,6 @@ class GetterSetterListener extends AbstractCodeListener
         $getter = $class->getMethod($getName);
         $getter->append(array($code->returnStmt($code->instanceVariable($property->getName()))));
         $getter->setAttribute('property', $property);
-    }
-
-    public function getSubscribedEvents()
-    {
-        return array('onGenerateProperty');
     }
 }
 
