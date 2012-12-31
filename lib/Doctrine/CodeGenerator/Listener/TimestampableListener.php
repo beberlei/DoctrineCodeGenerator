@@ -20,7 +20,7 @@
 namespace Doctrine\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\GeneratorEvent;
-use Doctrine\CodeGenerator\Builder\Manipulator;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
 
 /**
  * Turns classes into timestampable classes.
@@ -38,7 +38,6 @@ class TimestampableListener extends AbstractCodeListener
 
     public function onGenerateClass(GeneratorEvent $event)
     {
-        $code  = $this->code;
         $class = $event->getNode();
 
         if ( ! in_array($class->getName(), $this->classes)) {
@@ -48,8 +47,9 @@ class TimestampableListener extends AbstractCodeListener
         $this->makeTimestampable($class, $code);
     }
 
-    public function makeTimestampable($class, $code)
+    public function makeTimestampable($class)
     {
+        $code        = new CodeBuilder();
         $constructor = $class->getMethod('__construct');
 
         $class->getProperty('updated')->makeProtected()->setAttribute('type', 'DateTime');

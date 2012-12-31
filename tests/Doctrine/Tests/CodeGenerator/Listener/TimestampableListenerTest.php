@@ -3,46 +3,46 @@ namespace Doctrine\Tests\CodeGenerator\Listener;
 
 use Doctrine\CodeGenerator\Listener\TimestampableListener;
 use Doctrine\CodeGenerator\Builder\CodeBuilder;
-use Doctrine\CodeGenerator\Builder\Manipulator;
-use PHPParser_Node_Stmt_Class;
+use Doctrine\CodeGenerator\Builder\ClassBuilder;
 
 class TimestampableListenerTest extends \PHPUnit_Framework_TestCase
 {
     public function testMakeClassTimestampable()
     {
-        $this->markTestSkipped();
-        $class       = new PHPParser_Node_Stmt_Class("Test");
-        $codeBuilder = new CodeBuilder();
+        $class       = new ClassBuilder('Foo');
         $listener    = new TimestampableListener();
 
-        $listener->makeTimestampable($class, $codeBuilder);
-
-        $manipulator = new Manipulator();
-
-        $this->assertTrue($manipulator->hasProperty($class, 'updated'));
-        $this->assertTrue($manipulator->hasProperty($class, 'created'));
-        $this->assertTrue($manipulator->hasMethod($class, 'getCreated'));
-        $this->assertTrue($manipulator->hasMethod($class, 'getUpdated'));
-        $this->assertTrue($manipulator->hasMethod($class, 'setUpdated'));
+        $listener->makeTimestampable($class);
     }
 
     public function testMakeClassTimestampableExistingConstructor()
     {
-        $this->markTestSkipped();
-        $class       = new PHPParser_Node_Stmt_Class("Test");
         $codeBuilder = new CodeBuilder();
-        $manipulator = new Manipulator();
-
-        $manipulator->append(
-            $manipulator->findMethod($class, '__construct'),
-            $codeBuilder->code("\$this->foo = 'bar';")
-        );
+        $class       = new ClassBuilder('Foo');
+        $constructor = $class->getMethod('__construct');
+        $constructor->append(array(
+            $codeBuilder->assignment(
+                $codeBuilder->instanceVariable('foo'),
+                $codeBuilder->variable('bar')
+            )
+        ));
 
         $listener    = new TimestampableListener();
 
-        $listener->makeTimestampable($class, $codeBuilder);
+        $listener->makeTimestampable($class);
 
-        $constructor = $manipulator->findMethod($class, '__construct');
-        $this->assertEquals(2, count($constructor->stmts));
+        $node = $constructor->getNode();
+
+        $printer = new \PHPParser_PrettyPrinter_Zend();
+
+        $this->assertEquals(2, count($node->stmts));
+        $this->assertEquals(<<<'PHP'
+public function __construct()
+{
+    $this->foo = $bar;
+    $this->created = $this->updated = new \DateTime();
+}
+PHP
+        , $printer->prettyPrint(array($node)));
     }
 }
