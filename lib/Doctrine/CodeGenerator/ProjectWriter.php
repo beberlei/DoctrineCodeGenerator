@@ -37,10 +37,12 @@ class ProjectWriter
     {
         foreach ($project->getFiles() as $file) {
             $path = $this->root . "/" . $file->getPath();
-            $dir = dirname($path);
+            $dir  = dirname($path);
+
             if (!file_exists($dir)) {
                 mkdir($dir, 0777, true);
             }
+
             $code = "<?php\n" . $file->prettyPrint($this->printer);
             file_put_contents($path, $code);
         }
