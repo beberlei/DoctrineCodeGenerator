@@ -27,7 +27,7 @@ class MethodBuilder extends AbstractBuilder
 {
     private $builder;
     private $class;
-    private $params;
+    private $params = array();
 
     public function __construct($name, ClassBuilder $class)
     {
@@ -69,7 +69,7 @@ class MethodBuilder extends AbstractBuilder
     public function getNode()
     {
         $node = $this->builder->getNode();
-        //$node->params = $this->params;
+        $node->params = $this->params;
         return $node;
     }
 }
