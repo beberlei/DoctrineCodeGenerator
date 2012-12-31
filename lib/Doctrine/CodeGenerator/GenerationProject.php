@@ -21,11 +21,20 @@ namespace Doctrine\CodeGenerator;
 
 use Doctrine\CodeGenerator\Builder\ClassBuilder;
 
+/**
+ * Code Generation project holds classes and functions to generate.
+ *
+ * During code generation you can add and modify classes and functions
+ * to be generated.
+ */
 class GenerationProject
 {
     private $classes   = array();
     private $functions = array();
 
+    /**
+     * @return ClassBuilder
+     */
     public function getClass($className)
     {
         if ( ! isset($this->classes[$className])) {
