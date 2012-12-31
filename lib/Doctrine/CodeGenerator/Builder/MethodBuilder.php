@@ -27,11 +27,13 @@ class MethodBuilder extends AbstractBuilder
 {
     private $builder;
     private $class;
+    private $params;
 
     public function __construct($name, ClassBuilder $class)
     {
         parent::__construct($name);
-        $this->class = $class;
+
+        $this->class   = $class;
         $this->builder = new PHPParser_Builder_Method($name);
     }
 
@@ -61,9 +63,14 @@ class MethodBuilder extends AbstractBuilder
         $visitor->visitMethod($this);
     }
 
+    /**
+     * @return PHPParser_Node_Param
+     */
     public function getNode()
     {
-        return $this->builder->getNode();
+        $node = $this->builder->getNode();
+        //$node->params = $this->params;
+        return $node;
     }
 }
 
