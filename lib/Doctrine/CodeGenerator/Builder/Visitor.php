@@ -24,6 +24,5 @@ interface Visitor
     public function visitClass(ClassBuilder $class);
     public function visitMethod(MethodBuilder $method);
     public function visitProperty(PropertyBuilder $property);
-    public function visitFunction(FunctionBuilder $function);
 }
 

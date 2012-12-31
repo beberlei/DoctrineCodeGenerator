@@ -55,5 +55,20 @@ class ClassBuilderTest extends TestCase
         $this->assertTrue($builder->hasProperty("test"));
         $this->assertSame($property, $builder->getProperty("test"));
     }
+
+    public function testVisit()
+    {
+        $builder = new ClassBuilder("Foo");
+        $visitor = $this->getMock('Doctrine\CodeGenerator\Builder\Visitor');
+
+        $builder->getProperty("test");
+        $builder->getMethod("test");
+
+        $visitor->expects($this->at(0))->method('visitClass');
+        $visitor->expects($this->at(1))->method('visitProperty');
+        $visitor->expects($this->at(2))->method('visitMethod');
+
+        $builder->visit($visitor);
+    }
 }
 
