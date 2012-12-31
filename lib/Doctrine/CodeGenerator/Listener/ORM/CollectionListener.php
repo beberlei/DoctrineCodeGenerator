@@ -20,6 +20,7 @@
 namespace Doctrine\CodeGenerator\Listener\ORM;
 
 use Doctrine\CodeGenerator\Listener\AbstractCodeListener;
+use Doctrine\CodeGenerator\Builder\CodeBuilder;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 class CollectionListener extends AbstractCodeListener
@@ -46,16 +47,38 @@ class CollectionListener extends AbstractCodeListener
             return;
         }
 
+        $this->addConstructorInitialization($property);
+        $this->addAdderMethod($property);
+        $this->addRemoverMethod($property);
+    }
+
+    private function addConstructorInitialization($property)
+    {
         $class       = $property->getClass();
-        $code        = $this->code;
-        $addMethod   = 'add' . ucfirst($property->getName());
+        $constructor = $class->getMethod('__construct');
+        $code        = new CodeBuilder();
+
+        $constructor->append(array(
+            $code->assignment(
+                $code->instanceVariable($property->getName()),
+                $code->instantiate('Doctrine\Common\Collections\ArrayCollection')
+            )
+        ));
+    }
+
+    private function addAdderMethod($property)
+    {
+        $class     = $property->getClass();
+        $addMethod = 'add' . ucfirst($property->getName());
 
         if ($class->hasMethod($addMethod)) {
             return;
         }
 
-        $adder = $class->getMethod($addMethod);
-        $adder->param($property->getName());
+        $mapping = $property->getAttribute('mapping');
+        $code    = new CodeBuilder();
+        $adder   = $class->getMethod($addMethod);
+        $adder->param($property->getName(), null, $mapping['targetEntity']);
         $adder->append(array(
             $code->assignment(
                 $code->arrayDimFetch($code->instanceVariable($property->getName())),
@@ -63,6 +86,28 @@ class CollectionListener extends AbstractCodeListener
             )
         ));
         $adder->setAttribute('property', $property);
+    }
+
+    private function addRemoverMethod($property)
+    {
+        $class        = $property->getClass();
+        $removeMethod = 'remove' . ucfirst($property->getName());
+
+        if ($class->hasMethod($removeMethod)) {
+            return;
+        }
+
+        $mapping = $property->getAttribute('mapping');
+        $code    = new CodeBuilder();
+        $remover = $class->getMethod($removeMethod);
+        $remover->param($property->getName(), null, $mapping['targetEntity']);
+        $remover->append(array(
+            $code->methodCall(
+                $code->instanceVariable($property->getName()),
+                'removeElement',
+                array($property->getName())
+            )
+        ));
     }
 }
 

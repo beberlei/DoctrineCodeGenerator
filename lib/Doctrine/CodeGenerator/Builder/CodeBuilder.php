@@ -138,5 +138,27 @@ class CodeBuilder
     {
         return new \PHPParser_Node_Expr_ArrayDimFetch($variable);
     }
+
+    /**
+     * @return PHPParser_Node_Expr_MethodCall
+     */
+    public function methodCall($variable, $methodName, array $args = array())
+    {
+        foreach ($args as $idx => $arg) {
+            if (is_string($arg)) {
+                $args[$idx] = new \PHPParser_Node_Arg($this->variable($arg));
+            }
+        }
+
+        return new \PHPParser_Node_Expr_MethodCall($variable, $methodName, $args);
+    }
+
+    /**
+     * @return PHPParser_Node_Expr_MethodCall
+     */
+    public function localMethodCall($methodName, array $args = array())
+    {
+        return $this->methodCall($this->variable('this'), $methodName, $args);
+    }
 }
 

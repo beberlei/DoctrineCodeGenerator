@@ -44,7 +44,7 @@ class TimestampableListener extends AbstractCodeListener
             return;
         }
 
-        $this->makeTimestampable($class, $code);
+        $this->makeTimestampable($class);
     }
 
     public function makeTimestampable($class)
