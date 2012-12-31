@@ -22,6 +22,12 @@ namespace Doctrine\CodeGenerator;
 use PHPParser_PrettyPrinterAbstract;
 use PHPParser_PrettyPrinter_Zend;
 
+/**
+ * Generate project classes/functions to file-based code.
+ *
+ * Uses a PHPParser PrettyPrinter to do the formatting,
+ * defaults to the Zend pretty printer.
+ */
 class ProjectWriter
 {
     private $printer;
@@ -36,15 +42,21 @@ class ProjectWriter
     public function write(GenerationProject $project)
     {
         foreach ($project->getFiles() as $file) {
-            $path = $this->root . "/" . $file->getPath();
-            $dir  = dirname($path);
-
-            if (!file_exists($dir)) {
-                mkdir($dir, 0777, true);
-            }
-
-            $code = "<?php\n" . $file->prettyPrint($this->printer);
-            file_put_contents($path, $code);
+            $this->writeFile($file);
         }
     }
+
+    private function writeFile(File $file)
+    {
+        $path = $this->root . "/" . $file->getPath();
+        $dir  = dirname($path);
+
+        if (!file_exists($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $code = "<?php\n" . $file->prettyPrint($this->printer);
+        file_put_contents($path, $code);
+    }
 }
+

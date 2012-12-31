@@ -38,7 +38,6 @@ class GenerateClassesListener extends AbstractCodeListener
     public function onStartGeneration(ProjectEvent $event)
     {
         $project = $event->getProject();
-        $code    = $this->code;
 
         foreach ($this->config['classes'] as $className => $struct) {
             $class = $project->getClass($className);
