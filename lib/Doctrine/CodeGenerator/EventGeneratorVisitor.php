@@ -69,11 +69,6 @@ class EventGeneratorVisitor implements Visitor, Countable
         $this->dispatch($property, "onGenerateProperty");
     }
 
-    public function visitFunction(FunctionBuilder $function)
-    {
-        $this->dispatch($function, "onGenerateFunction");
-    }
-
     private function dispatch($builder, $eventName)
     {
         if ($this->visited->contains($builder)) {
