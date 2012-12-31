@@ -43,15 +43,5 @@ class File
     {
         return $printer->prettyPrint($this->ast);
     }
-
-    public function traverse(PHPParser_NodeTraverser $traverser)
-    {
-        $traverser->traverse($this->ast);
-    }
-
-    public function append(PHPParser_NodeAbstract $node)
-    {
-        $this->ast[] = $node;
-    }
 }
 

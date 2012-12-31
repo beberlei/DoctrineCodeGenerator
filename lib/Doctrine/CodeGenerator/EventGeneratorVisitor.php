@@ -37,9 +37,9 @@ class EventGeneratorVisitor implements Visitor, Countable
 
     public function __construct(EventManager $evm, GenerationProject $project)
     {
-        $this->visited = new SplObjectStorage();
         $this->evm     = $evm;
         $this->project = $project;
+        $this->visited = new SplObjectStorage();
     }
 
     public function visitClass(ClassBuilder $class)
