@@ -131,6 +131,9 @@ class ClassBuilder extends AbstractBuilder
         return $this;
     }
 
+    /**
+     * @return PHPParser_Node_Stmt_Class
+     */
     public function getNode()
     {
         $manipulator = new Manipulator();
