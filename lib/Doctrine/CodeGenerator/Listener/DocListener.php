@@ -102,7 +102,7 @@ EPM
             return $property->getName();
         }
 
-        return lcfirst(substr($node->name, 3));
+        return lcfirst(substr($node->getName(), 3));
     }
 }
 
