@@ -27,23 +27,11 @@ use Doctrine\CodeGenerator\GenerationProject;
 
 abstract class AbstractCodeListener implements EventSubscriber
 {
-    protected $code;
-    protected $project;
     protected $eventManager;
 
     public function setEventManager(EventManager $eventManager)
     {
         $this->eventManager = $eventManager;
-    }
-
-    public function setCodeBuilder(CodeBuilder $builder)
-    {
-        $this->code = $builder;
-    }
-
-    public function setProject(GenerationProject $project)
-    {
-        $this->project = $project;
     }
 
     public function getSubscribedEvents()

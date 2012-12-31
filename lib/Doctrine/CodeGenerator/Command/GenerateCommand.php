@@ -62,9 +62,8 @@ EOF
             mkdir($destination, 0777, true);
         }
 
-        $evm          = new \Doctrine\Common\EventManager;
-        $code         = new \Doctrine\CodeGenerator\Builder\CodeBuilder;
-        $project      = new \Doctrine\CodeGenerator\GenerationProject();
+        $evm     = new \Doctrine\Common\EventManager;
+        $project = new \Doctrine\CodeGenerator\GenerationProject();
 
         foreach ($config['generator']['listeners'] as $listener => $args) {
             if ( ! is_subclass_of($listener, 'Doctrine\CodeGenerator\Listener\AbstractCodeListener')) {
@@ -72,8 +71,6 @@ EOF
             }
 
             $listener = new $listener($args);
-            $listener->setCodeBuilder($code);
-            $listener->setProject($project);
             $listener->setEventManager($evm);
 
             $evm->addEventSubscriber($listener);

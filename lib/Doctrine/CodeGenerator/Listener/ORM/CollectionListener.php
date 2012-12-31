@@ -25,20 +25,6 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 class CollectionListener extends AbstractCodeListener
 {
-    private $metadataFactory;
-
-    public function injectMetadataFactory($metadata)
-    {
-        $this->metadataFactory = $metadata;
-    }
-
-    private function isToManyAssocation($propertyNode)
-    {
-        $mapping = $propertyNode->getAttribute('mapping');
-        return $propertyNode->getAttribute('isAssociation') &&
-               ($mapping['type'] & ClassMetadataInfo::TO_MANY) > 0;
-    }
-
     public function onGenerateProperty($event)
     {
         $property = $event->getNode();
@@ -108,6 +94,13 @@ class CollectionListener extends AbstractCodeListener
                 array($property->getName())
             )
         ));
+    }
+
+    private function isToManyAssocation($propertyNode)
+    {
+        $mapping = $propertyNode->getAttribute('mapping');
+        return $propertyNode->getAttribute('isAssociation') &&
+               ($mapping['type'] & ClassMetadataInfo::TO_MANY) > 0;
     }
 }
 
